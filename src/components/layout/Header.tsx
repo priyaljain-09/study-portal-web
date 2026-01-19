@@ -1,15 +1,25 @@
-import { Search, Bell, Menu } from 'lucide-react';
+import { Search, Bell, Menu, ArrowLeft } from 'lucide-react';
 
 interface HeaderProps {
   userName?: string;
   userInitial?: string;
   onMenuClick?: () => void;
+  onBackClick?: () => void;
   className?: string;
 }
 
-const Header = ({ userInitial = 'P', onMenuClick, className = '' }: HeaderProps) => {
+const Header = ({ userInitial = 'P', onMenuClick, onBackClick, className = '' }: HeaderProps) => {
   return (
-    <header className={`bg-white text-black p-4 flex items-center justify-end ${className}`}>      
+    <header className={`bg-white text-black p-4 flex items-center ${onBackClick ? 'justify-between' : 'justify-end'} ${className}`}>
+      {onBackClick && (
+        <button
+          onClick={onBackClick}
+          className="p-2 hover:bg-gray-100 rounded-lg transition"
+          title="Back"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+      )}
       <div className="flex items-center space-x-4">
         <button className="p-2 hover:bg-green-700 rounded-lg transition">
           <Search className="w-5 h-5" />
