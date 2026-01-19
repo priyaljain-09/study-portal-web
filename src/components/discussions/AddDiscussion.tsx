@@ -18,7 +18,7 @@ const AddDiscussion = () => {
   const isEditMode = !!discussionId || !!discussionFromState;
 
   // Fetch discussion data if we have discussionId but no discussion in state
-  const { data: fetchedDiscussion, isLoading: isLoadingDiscussion } = useGetDiscussionByIdQuery(
+  const { data: fetchedDiscussion } = useGetDiscussionByIdQuery(
     discussionId ? Number(discussionId) : 0,
     { skip: !discussionId || !!discussionFromState }
   );
