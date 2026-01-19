@@ -18,7 +18,7 @@ import {
   useDeleteMaterialMutation,
   moduleApi,
 } from '../../redux/api/moduleApi';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { useAppDispatch } from '../../redux/hooks';
 
 interface Chapter {
   id: number;
@@ -331,8 +331,6 @@ const ModulesList: React.FC<ModulesListProps> = ({
         const isExpanded = expandedIds.includes(module.id);
         const isEditing = editingModuleId === module.id;
         const isSelected = selectedModuleId === module.id;
-        const hasContent = (module.chapters && module.chapters.length > 0) || 
-                          (module.materials && module.materials.length > 0);
 
         return (
           <div
@@ -489,7 +487,7 @@ const ModulesList: React.FC<ModulesListProps> = ({
                     <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">Chapters</h4>
                     {[...module.chapters]
                       .sort((a, b) => (a.order || 0) - (b.order || 0))
-                      .map((chapter, chapterIndex) => {
+                      .map((chapter) => {
                         const isChapterSelected = selectedChapterId?.chapterId === chapter.id && 
                                                   selectedChapterId?.moduleId === module.id;
                         return (
