@@ -9,15 +9,16 @@ interface AnnouncementListProps {
   subjectId: number;
   classroomId?: number;
   userRole: string;
+  subjectName?: string;
   onAddAnnouncement?: () => void;
   onAnnouncementClick?: (announcement: any) => void;
+  onEditAnnouncement?: (announcement: any) => void;
 }
 
 const AnnouncementList: React.FC<AnnouncementListProps> = ({
   subjectId,
   classroomId,
   userRole,
-  subjectName,
   onAddAnnouncement,
   onAnnouncementClick,
   onEditAnnouncement,
