@@ -26,6 +26,14 @@ const AddChapter = () => {
     userProfile?.user?.username?.charAt(0) ||
     'T';
 
+  // Helper function to get the correct route path based on classroomId
+  const getRoutePath = (path: string) => {
+    if (classroomId) {
+      return `/classroom/${classroomId}${path}`;
+    }
+    return path;
+  };
+
   const handleSave = async () => {
     if (!chapterTitle.trim()) {
       alert('Please enter a chapter title');
@@ -55,7 +63,7 @@ const AddChapter = () => {
           },
         }).unwrap();
       }
-      navigate(`/subject/${subjectId}`, { state: { subjectName, classroomId } });
+      navigate(getRoutePath(`/subject/${subjectId}`), { state: { subjectName, classroomId } });
     } catch (error) {
       console.error('Error saving chapter:', error);
       alert('Failed to save chapter. Please try again.');
@@ -63,7 +71,7 @@ const AddChapter = () => {
   };
 
   const handleBack = () => {
-    navigate(`/subject/${subjectId}`, { state: { subjectName, classroomId } });
+    navigate(getRoutePath(`/subject/${subjectId}`), { state: { subjectName, classroomId } });
   };
 
   return (
@@ -140,6 +148,7 @@ const AddChapter = () => {
 };
 
 export default AddChapter;
+
 
 
 

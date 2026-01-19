@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
@@ -30,7 +30,9 @@ const formatDate = (isoDate: string | undefined): string => {
 const AnnouncementDetail = () => {
   const { subjectId, announcementId } = useParams<{ subjectId: string; announcementId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
+  const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
 
   const { data: announcementDetail = {}, isLoading } = useGetAnnouncementByIdQuery(Number(announcementId), {
     skip: !announcementId,
@@ -53,7 +55,15 @@ const AnnouncementDetail = () => {
           <Header
             userInitial={userInitial}
             userName={userProfile?.user?.first_name || userProfile?.user?.username}
-            onBackClick={() => navigate(`/subject/${subjectId}`)}
+            onBackClick={() => {
+              const getRoutePath = (path: string) => {
+                if (userRole === 'teacher' && location.state?.classroomId) {
+                  return `/classroom/${location.state.classroomId}${path}`;
+                }
+                return path;
+              };
+              navigate(`${getRoutePath(`/subject/${subjectId}`)}?tab=announcement`);
+            }}
           />
           <div className="flex-1 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>

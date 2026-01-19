@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import Sidebar from '../components/layout/Sidebar';
@@ -10,6 +10,7 @@ import {
   useUploadMaterialMutation 
 } from '../redux/api/moduleApi';
 import { ArrowLeft, Plus, FileText } from 'lucide-react';
+import RichTextEditor from '../components/editor/RichTextEditor';
 
 interface Section {
   title: string;
@@ -52,6 +53,14 @@ const AddModule = () => {
   const userInitial = userProfile?.user?.first_name?.charAt(0) ||
     userProfile?.user?.username?.charAt(0) ||
     'T';
+
+  // Helper function to get the correct route path based on classroomId
+  const getRoutePath = (path: string) => {
+    if (classroomId) {
+      return `/classroom/${classroomId}${path}`;
+    }
+    return path;
+  };
 
   const createModuleAPI = async (): Promise<number | null> => {
     if (moduleId) return moduleId;
@@ -163,7 +172,7 @@ const AddModule = () => {
             description: currentSectionDescription,
           },
         }).unwrap();
-        navigate(`/subject/${subjectId}`, { state: { subjectName, classroomId } });
+        navigate(getRoutePath(`/subject/${subjectId}`), { state: { subjectName, classroomId } });
         return;
       } catch (error) {
         console.error('Error updating chapter:', error);
@@ -179,7 +188,7 @@ const AddModule = () => {
 
       const newModuleId = await createModuleAPI();
       if (newModuleId) {
-        navigate(`/subject/${subjectId}`, { state: { subjectName, classroomId } });
+        navigate(getRoutePath(`/subject/${subjectId}`), { state: { subjectName, classroomId } });
       }
       return;
     }
@@ -378,16 +387,13 @@ const AddModule = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Content
         </label>
-        <textarea
-          placeholder="Write your content here. You can use HTML tags for formatting..."
+        <RichTextEditor
           value={currentSectionDescription}
-          onChange={(e) => setCurrentSectionDescription(e.target.value)}
-          rows={12}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-y font-mono text-sm"
+          onChange={setCurrentSectionDescription}
+          placeholder="Write your content here..."
+          height={400}
+          className="w-full"
         />
-        <p className="mt-2 text-xs text-gray-500">
-          You can use HTML tags for formatting (e.g., &lt;p&gt;, &lt;h1&gt;, &lt;strong&gt;, etc.)
-        </p>
       </div>
 
       {!isEditMode && (

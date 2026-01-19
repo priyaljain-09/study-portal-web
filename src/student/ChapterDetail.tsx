@@ -8,13 +8,25 @@ import HTMLContentViewer from '../components/HTMLContentViewer';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ChapterDetail = () => {
-  const { subjectId, chapterId } = useParams<{ subjectId: string; chapterId: string }>();
+  const { subjectId, chapterId, classroomId: classroomIdParam } = useParams<{ subjectId: string; chapterId: string; classroomId?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
+  const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
 
   // Get data from location state
-  const { chapter, module, subjectName } = location.state || {};
+  const { chapter, module, subjectName, classroomId: classroomIdFromState } = location.state || {};
+  
+  // Get classroomId from URL params or location state
+  const classroomId = classroomIdParam ? Number(classroomIdParam) : classroomIdFromState;
+
+  // Helper function to get the correct route path based on user role
+  const getRoutePath = (path: string) => {
+    if (userRole === 'teacher' && classroomId) {
+      return `/classroom/${classroomId}${path}`;
+    }
+    return path;
+  };
 
   // Get chapters from the current module only (not all modules)
   const moduleChapters = useMemo(() => {
@@ -47,11 +59,12 @@ const ChapterDetail = () => {
   const goToPreviousChapter = () => {
     if (canGoToPrevious && moduleChapters.length > 0) {
       const previousChapter = moduleChapters[chapterIndex - 1];
-      navigate(`/subject/${subjectId}/chapter/${previousChapter.id}`, {
+      navigate(getRoutePath(`/subject/${subjectId}/chapter/${previousChapter.id}`), {
         state: {
           chapter: previousChapter,
           module,
           subjectName,
+          classroomId,
         },
         replace: true,
       });
@@ -61,11 +74,12 @@ const ChapterDetail = () => {
   const goToNextChapter = () => {
     if (canGoToNext && moduleChapters.length > 0) {
       const nextChapter = moduleChapters[chapterIndex + 1];
-      navigate(`/subject/${subjectId}/chapter/${nextChapter.id}`, {
+      navigate(getRoutePath(`/subject/${subjectId}/chapter/${nextChapter.id}`), {
         state: {
           chapter: nextChapter,
           module,
           subjectName,
+          classroomId,
         },
         replace: true,
       });
@@ -83,7 +97,9 @@ const ChapterDetail = () => {
         <Header
           userInitial={userInitial}
           userName={userProfile?.user?.first_name || userProfile?.user?.username}
-          onBackClick={() => navigate(`/subject/${subjectId}`)}
+          onBackClick={() => navigate(getRoutePath(`/subject/${subjectId}`), {
+            state: { subjectName, classroomId }
+          })}
         />
 
         {/* Main Content - Scrollable */}

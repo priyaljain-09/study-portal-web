@@ -14,11 +14,22 @@ interface ClassItem {
   subject_name: string;
 }
 
+interface PendingAssignment {
+  id: number;
+  title: string;
+  subject_name: string;
+  classroom_name: string;
+  submitted_count?: number;
+  total_count?: number;
+  due_date: string;
+}
+
 const TeacherDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
+  const isLoading = useAppSelector((state) => state.applicationData.isLoading);
   const dashboardData = useAppSelector((state) => state.dashboard.teacherDashboardData) as any;
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -29,7 +40,7 @@ const TeacherDashboard = () => {
   // Get classes array directly from API response
   const classes: ClassItem[] = dashboardData?.classes || [];
   const announcements = dashboardData?.announcements || [];
-  const pendingAssignments = dashboardData?.pending_assignments || [];
+  const pendingAssignments: PendingAssignment[] = dashboardData?.pending_assignments || [];
 
   const getSubjectColor = (index: number): { borderColor: string; bgColor: string } => {
     const color = SUBJECT_COLORS[index % SUBJECT_COLORS.length];
@@ -45,7 +56,7 @@ const TeacherDashboard = () => {
   };
 
   const handleClassClick = (classItem: ClassItem) => {
-    navigate(`/subject/${classItem.subject_id}`, {
+    navigate(`/classroom/${classItem.classroom_id}/subject/${classItem.subject_id}`, {
       state: {
         subjectName: classItem.subject_name,
         classroomId: classItem.classroom_id,
@@ -59,7 +70,7 @@ const TeacherDashboard = () => {
 
   // Calculate statistics
   const totalClasses = classes.length;
-  const totalPendingGrading = pendingAssignments.reduce((sum, assignment) => {
+  const totalPendingGrading = pendingAssignments.reduce((sum: number, assignment: PendingAssignment) => {
     const submitted = assignment.submitted_count || 0;
     const total = assignment.total_count || 0;
     return sum + (total - submitted);
@@ -80,6 +91,14 @@ const TeacherDashboard = () => {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto bg-white">
+          {isLoading && !dashboardData?.classes ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="flex flex-col items-center justify-center gap-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                <p className="text-gray-600 text-sm font-medium">Loading dashboard...</p>
+              </div>
+            </div>
+          ) : (
           <div className="p-8">
             {/* Page Header */}
             <div className="mb-8 flex items-center justify-between">
@@ -186,7 +205,7 @@ const TeacherDashboard = () => {
                   <div className="mt-8 bg-white rounded-xl shadow-md p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-4">Pending Assignments</h2>
                     <div className="space-y-3">
-                      {pendingAssignments.slice(0, 5).map((assignment: any) => {
+                      {pendingAssignments.slice(0, 5).map((assignment: PendingAssignment) => {
                         const submitted = assignment.submitted_count || 0;
                         const total = assignment.total_count || 0;
                         const pending = total - submitted;
@@ -262,6 +281,7 @@ const TeacherDashboard = () => {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>

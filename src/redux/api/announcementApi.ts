@@ -8,12 +8,16 @@ export const announcementApi = createApi({
   tagTypes: ['Announcements', 'Announcement'],
   endpoints: (builder) => ({
     // Get announcements by subject (Student & Teacher)
-    getAnnouncementsBySubject: builder.query<any, number>({
-      query: (subjectId) => ({
-        url: `/users/subjects/${subjectId}/announcements/`,
-        method: 'GET',
-      }),
-      providesTags: (_result, _error, subjectId) => [
+    getAnnouncementsBySubject: builder.query<any, { subjectId: number; classroomId?: number }>({
+      query: ({ subjectId, classroomId }) => {
+        const params = classroomId ? { classroom_id: classroomId } : {};
+        return {
+          url: `/users/subjects/${subjectId}/announcements/`,
+          method: 'GET',
+          params,
+        };
+      },
+      providesTags: (_result, _error, { subjectId }) => [
         { type: 'Announcements', id: subjectId },
         'Announcements',
       ],

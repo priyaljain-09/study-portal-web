@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
@@ -16,14 +16,40 @@ import AssignmentList from '../components/assignments/AssignmentList';
 import { BookOpen, MessageSquare, Bell, FileText, Award, Users, ClipboardList } from 'lucide-react';
 
 const SubjectDetail = () => {
-  const { subjectId } = useParams<{ subjectId: string }>();
+  const { subjectId, classroomId: classroomIdParam } = useParams<{ subjectId: string; classroomId?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
   const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
   const dashboardData = useAppSelector((state) => state.dashboard.allSubjects) as any;
+  const teacherDashboardData = useAppSelector((state) => state.dashboard.teacherDashboardData) as any;
   
-  const [activeTab, setActiveTab] = useState<'module' | 'discussion' | 'announcement' | 'syllabus' | 'grades' | 'people' | 'assignment'>('module');
+  // Get active tab from URL query parameter or default to 'module'
+  const tabFromQuery = searchParams.get('tab') as 'module' | 'discussion' | 'announcement' | 'syllabus' | 'grades' | 'people' | 'assignment' | null;
+  const [activeTab, setActiveTab] = useState<'module' | 'discussion' | 'announcement' | 'syllabus' | 'grades' | 'people' | 'assignment'>(
+    tabFromQuery || 'module'
+  );
+
+  // Update URL when tab changes (but not on initial load if query param exists)
+  useEffect(() => {
+    if (tabFromQuery && tabFromQuery === activeTab) {
+      // Tab matches query param, no need to update
+      return;
+    }
+    if (!tabFromQuery && activeTab === 'module') {
+      // Default state, no need to update URL
+      return;
+    }
+    setSearchParams({ tab: activeTab });
+  }, [activeTab, tabFromQuery, setSearchParams]);
+
+  // Update active tab when query parameter changes (only if different)
+  useEffect(() => {
+    if (tabFromQuery && tabFromQuery !== activeTab) {
+      setActiveTab(tabFromQuery);
+    }
+  }, [tabFromQuery]);
 
   // Get subject name and color from dashboard data or location state
   const subjectName = useMemo(() => {
@@ -45,10 +71,35 @@ const SubjectDetail = () => {
     return '#8B5CF6';
   }, [dashboardData, subjectId]);
 
-  // Get classroomId from location state if available (for teachers)
+  // Get classroomId from URL params, location state, or dashboard data (for teachers)
   const classroomId = useMemo(() => {
-    return location.state?.classroomId;
-  }, [location.state]);
+    // First try URL params (for teacher routes)
+    if (classroomIdParam) {
+      return Number(classroomIdParam);
+    }
+    // Then try location state
+    if (location.state?.classroomId) {
+      return location.state.classroomId;
+    }
+    // If not in location state, try to get from teacher dashboard data
+    if (userRole === 'teacher' && teacherDashboardData?.classes && Array.isArray(teacherDashboardData.classes)) {
+      const classItem = teacherDashboardData.classes.find(
+        (c: any) => c.subject_id === Number(subjectId)
+      );
+      if (classItem?.classroom_id) {
+        return classItem.classroom_id;
+      }
+    }
+    return undefined;
+  }, [classroomIdParam, location.state, userRole, subjectId, teacherDashboardData]);
+
+  // Helper function to get the correct route path based on user role
+  const getRoutePath = (path: string) => {
+    if (userRole === 'teacher' && classroomId) {
+      return `/classroom/${classroomId}${path}`;
+    }
+    return path;
+  };
 
   // Use different query based on user role
   const { data: studentModules, isLoading: studentModulesLoading } = useGetModulesBySubjectQuery(
@@ -93,27 +144,28 @@ const SubjectDetail = () => {
             subjectId={Number(subjectId)}
             classroomId={classroomId}
             onAddModule={() => {
-              navigate(`/subject/${subjectId}/add-module`, {
+              navigate(getRoutePath(`/subject/${subjectId}/add-module`), {
                 state: { subjectName, classroomId }
               });
             }}
             onChapterClick={(chapter, module) => {
               // Navigate to chapter detail page - only pass module (which contains its chapters)
-              navigate(`/subject/${subjectId}/chapter/${chapter.id}`, {
+              navigate(getRoutePath(`/subject/${subjectId}/chapter/${chapter.id}`), {
                 state: { 
                   chapter, 
                   module, 
-                  subjectName
+                  subjectName,
+                  classroomId
                 }
               });
             }}
             onAddChapter={(module) => {
-              navigate(`/subject/${subjectId}/add-chapter`, {
+              navigate(getRoutePath(`/subject/${subjectId}/add-chapter`), {
                 state: { module, subjectName, classroomId, isEditMode: false }
               });
             }}
             onEditChapter={(chapter, module) => {
-              navigate(`/subject/${subjectId}/add-chapter`, {
+              navigate(getRoutePath(`/subject/${subjectId}/add-chapter`), {
                 state: { chapter, module, subjectName, classroomId, isEditMode: true }
               });
             }}
@@ -126,14 +178,16 @@ const SubjectDetail = () => {
             subjectId={Number(subjectId)}
             classroomId={classroomId}
             userRole={userRole}
+            subjectName={subjectName}
             onAddDiscussion={() => {
-              // Navigate to add discussion page or show modal
-              alert('Add Discussion functionality - to be implemented');
+              navigate(getRoutePath(`/subject/${subjectId}/add-discussion?tab=discussion`), {
+                state: { subjectName, classroomId }
+              });
             }}
             onDiscussionClick={(discussion) => {
               // Navigate to discussion detail page
-              navigate(`/subject/${subjectId}/discussion/${discussion.id}`, {
-                state: { discussion, subjectName }
+              navigate(getRoutePath(`/subject/${subjectId}/discussion/${discussion.id}`), {
+                state: { discussion, subjectName, classroomId }
               });
             }}
           />
@@ -145,14 +199,21 @@ const SubjectDetail = () => {
             subjectId={Number(subjectId)}
             classroomId={classroomId}
             userRole={userRole}
+            subjectName={subjectName}
             onAddAnnouncement={() => {
-              // Navigate to add announcement page or show modal
-              alert('Add Announcement functionality - to be implemented');
+              navigate(getRoutePath(`/subject/${subjectId}/add-announcement?tab=announcement`), {
+                state: { subjectName, classroomId }
+              });
             }}
             onAnnouncementClick={(announcement) => {
               // Navigate to announcement detail page
-              navigate(`/subject/${subjectId}/announcement/${announcement.id}`, {
-                state: { announcement, subjectName }
+              navigate(getRoutePath(`/subject/${subjectId}/announcement/${announcement.id}`), {
+                state: { announcement, subjectName, classroomId }
+              });
+            }}
+            onEditAnnouncement={(announcement) => {
+              navigate(getRoutePath(`/subject/${subjectId}/edit-announcement/${announcement.id}?tab=announcement`), {
+                state: { announcement, subjectName, classroomId }
               });
             }}
           />
@@ -165,12 +226,19 @@ const SubjectDetail = () => {
             classroomId={classroomId}
             userRole={userRole}
             onAddSyllabus={() => {
-              // Navigate to add syllabus page or show modal
-              alert('Add Syllabus functionality - to be implemented');
+              navigate(getRoutePath(`/subject/${subjectId}/add-syllabus?tab=syllabus`), {
+                state: { subjectName, classroomId }
+              });
             }}
-            onEditSyllabus={(_item) => {
-              // Navigate to edit syllabus page
-              alert('Edit Syllabus functionality - to be implemented');
+            onEditSyllabus={(item) => {
+              navigate(getRoutePath(`/subject/${subjectId}/edit-syllabus/${item.id}?tab=syllabus`), {
+                state: { 
+                  syllabusData: item, 
+                  subjectName, 
+                  classroomId,
+                  isEditMode: true
+                }
+              });
             }}
           />
         );
@@ -208,7 +276,7 @@ const SubjectDetail = () => {
             }}
             onAssignmentClick={(assignment) => {
               // Navigate to assignment detail page
-              navigate(`/subject/${subjectId}/assignment/${assignment.id}`, {
+              navigate(getRoutePath(`/subject/${subjectId}/assignment/${assignment.id}`), {
                 state: { 
                   assignment, 
                   subjectName, 
@@ -257,7 +325,10 @@ const SubjectDetail = () => {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setSearchParams({ tab: tab.id });
+                      }}
                       className={`
                         flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition
                         ${

@@ -280,15 +280,70 @@ export const discussionApi = createApi({
         url: `/users/replies/${replyId}/like/`,
         method: 'POST',
       }),
-      invalidatesTags: ['Replies', 'Discussion'],
-      async onQueryStarted(_replyId, _api) {
-        try {
-          await _api.queryFulfilled;
-          // No toast for like/unlike actions
-        } catch (error) {
-          // Error toast is handled by baseQueryWithReauth
+      async onQueryStarted(replyId, { dispatch, queryFulfilled, getState }) {
+        // Get the discussion ID from the current discussion query
+        const state = getState() as any;
+        const discussionApiState = state.discussionApi;
+        const queries = discussionApiState?.queries || {};
+        
+        // Find the current discussion query
+        let discussionId: number | null = null;
+        Object.keys(queries).forEach((queryKey) => {
+          if (queryKey.includes('getDiscussionById')) {
+            const queryData = queries[queryKey];
+            if (queryData?.data?.id) {
+              discussionId = queryData.data.id;
+            }
+          }
+        });
+
+        // Optimistic update for the discussion
+        if (discussionId) {
+          const patchResult = dispatch(
+            discussionApi.util.updateQueryData(
+              'getDiscussionById',
+              discussionId,
+              (draft: any) => {
+                if (draft && draft.replies) {
+                  const replyIndex = draft.replies.findIndex((r: any) => r.id === replyId);
+                  if (replyIndex !== -1) {
+                    const reply = draft.replies[replyIndex];
+                    const isCurrentlyLiked = reply.liked_by_me === true || reply.is_liked_by_me === true;
+                    
+                    // Toggle like state
+                    reply.liked_by_me = !isCurrentlyLiked;
+                    reply.is_liked_by_me = !isCurrentlyLiked;
+                    
+                    // Update like count
+                    if (isCurrentlyLiked) {
+                      reply.like_count = Math.max(0, (reply.like_count || 0) - 1);
+                    } else {
+                      reply.like_count = (reply.like_count || 0) + 1;
+                    }
+                  }
+                }
+              }
+            )
+          );
+
+          try {
+            await queryFulfilled;
+          } catch (error) {
+            // Revert optimistic update on error
+            patchResult.undo();
+            // Error toast is handled by baseQueryWithReauth
+          }
+        } else {
+          // If no discussion found, just wait for the query to complete
+          try {
+            await queryFulfilled;
+          } catch (error) {
+            // Error toast is handled by baseQueryWithReauth
+          }
         }
       },
+      // Don't invalidate tags - optimistic update handles UI
+      // invalidatesTags: ['Replies', 'Discussion'],
     }),
     // Lock/Unlock discussion (teacher only)
     lockDiscussion: builder.mutation<any, { discussionId: number; isLocked: boolean }>({

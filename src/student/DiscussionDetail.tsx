@@ -149,45 +149,14 @@ const DiscussionDetail = () => {
 
     setLikingReplyId(replyId);
 
-    const isCurrentlyLiked = likedReplies.has(replyId);
-    const currentCount = replyLikeCounts[replyId] || 0;
-
-    // Update UI optimistically
-    setLikedReplies(prev => {
-      const newSet = new Set(prev);
-      if (isCurrentlyLiked) {
-        newSet.delete(replyId);
-      } else {
-        newSet.add(replyId);
-      }
-      return newSet;
-    });
-
-    setReplyLikeCounts(prev => ({
-      ...prev,
-      [replyId]: isCurrentlyLiked ? currentCount - 1 : currentCount + 1,
-    }));
-
     try {
       await likeReply(replyId).unwrap();
+      // The optimistic update in the API will automatically update the cache
+      // The component will re-render with the updated discussionDetails
       setLikingReplyId(null);
-    } catch {
-      // Revert optimistic update on error
-      setLikedReplies(prev => {
-        const newSet = new Set(prev);
-        if (isCurrentlyLiked) {
-          newSet.add(replyId);
-        } else {
-          newSet.delete(replyId);
-        }
-        return newSet;
-      });
-
-      setReplyLikeCounts(prev => ({
-        ...prev,
-        [replyId]: currentCount,
-      }));
+    } catch (error) {
       setLikingReplyId(null);
+      console.error('Error liking reply:', error);
     }
   };
 
@@ -291,7 +260,15 @@ const DiscussionDetail = () => {
           <Header
             userInitial={userInitial}
             userName={userProfile?.user?.first_name || userProfile?.user?.username}
-            onBackClick={() => navigate(`/subject/${subjectId}`)}
+            onBackClick={() => {
+            const getRoutePath = (path: string) => {
+              if (userRole === 'teacher' && location.state?.classroomId) {
+                return `/classroom/${location.state.classroomId}${path}`;
+              }
+              return path;
+            };
+            navigate(`${getRoutePath(`/subject/${subjectId}`)}?tab=discussion`);
+          }}
           />
           <div className="flex-1 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
@@ -309,7 +286,15 @@ const DiscussionDetail = () => {
         <Header
           userInitial={userInitial}
           userName={userProfile?.user?.first_name || userProfile?.user?.username}
-          onBackClick={() => navigate(`/subject/${subjectId}`)}
+          onBackClick={() => {
+            const getRoutePath = (path: string) => {
+              if (userRole === 'teacher' && location.state?.classroomId) {
+                return `/classroom/${location.state.classroomId}${path}`;
+              }
+              return path;
+            };
+            navigate(`${getRoutePath(`/subject/${subjectId}`)}?tab=discussion`);
+          }}
         />
 
         <div className="flex-1 overflow-y-auto bg-white" style={{ paddingBottom: '100px' }}>
@@ -483,22 +468,20 @@ const DiscussionDetail = () => {
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
                               ) : (
                                 (() => {
-                                  const hasOptimisticState = replyLikeCounts[reply.id] !== undefined;
-                                  const isLiked = hasOptimisticState
-                                    ? likedReplies.has(reply.id)
-                                    : (reply.liked_by_me === true || reply.is_liked_by_me === true);
-                                  const likeCount = hasOptimisticState
-                                    ? replyLikeCounts[reply.id]
-                                    : (reply.like_count || 0);
+                                  // Use reply data directly from API (updated by optimistic update)
+                                  const isLiked = reply.liked_by_me === true || reply.is_liked_by_me === true;
+                                  const likeCount = reply.like_count || 0;
 
                                   return (
                                     <>
                                       <Heart
-                                        className="w-4 h-4"
-                                        style={{ color: isLiked ? '#ff0000' : '#606060' }}
-                                        fill={isLiked ? '#ff0000' : 'none'}
+                                        className="w-4 h-4 transition-colors"
+                                        style={{ 
+                                          color: isLiked ? '#ef4444' : '#606060',
+                                          fill: isLiked ? '#ef4444' : 'none'
+                                        }}
                                       />
-                                      <span className={`text-xs font-medium ${isLiked ? 'text-red-600' : 'text-gray-600'}`}>
+                                      <span className={`text-xs font-medium transition-colors ${isLiked ? 'text-red-600' : 'text-gray-600'}`}>
                                         {likeCount}
                                       </span>
                                     </>

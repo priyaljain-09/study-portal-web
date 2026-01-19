@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   MessageSquare,
   Plus,
@@ -12,7 +13,6 @@ import {
   useDeleteDiscussionMutation,
   useLockDiscussionMutation,
 } from '../../redux/api/discussionApi';
-import { useAppSelector } from '../../redux/hooks';
 
 interface DiscussionListProps {
   subjectId: number;
@@ -20,6 +20,7 @@ interface DiscussionListProps {
   userRole: string;
   onAddDiscussion?: () => void;
   onDiscussionClick?: (discussion: any) => void;
+  subjectName?: string;
 }
 
 const DiscussionList: React.FC<DiscussionListProps> = ({
@@ -28,7 +29,9 @@ const DiscussionList: React.FC<DiscussionListProps> = ({
   userRole,
   onAddDiscussion,
   onDiscussionClick,
+  subjectName,
 }) => {
+  const navigate = useNavigate();
   const [menuVisibleForId, setMenuVisibleForId] = useState<number | null>(null);
   const [lockingDiscussionId, setLockingDiscussionId] = useState<number | null>(null);
   const [deletingDiscussionId, setDeletingDiscussionId] = useState<number | null>(null);
@@ -77,8 +80,21 @@ const DiscussionList: React.FC<DiscussionListProps> = ({
 
   const handleEditDiscussion = (discussion: any) => {
     handleCloseMenu();
-    // Navigate to edit discussion page or show modal
-    alert('Edit Discussion functionality - to be implemented');
+    // Helper function to get the correct route path based on user role
+    const getRoutePath = (path: string) => {
+      if (userRole === 'teacher' && classroomId) {
+        return `/classroom/${classroomId}${path}`;
+      }
+      return path;
+    };
+    // Navigate to edit discussion page with discussion data
+    navigate(getRoutePath(`/subject/${subjectId}/edit-discussion/${discussion.id}?tab=discussion`), {
+      state: { 
+        discussion, 
+        subjectName, 
+        classroomId 
+      }
+    });
   };
 
   const handleDeleteDiscussion = async (discussionId: number) => {
@@ -139,12 +155,21 @@ const DiscussionList: React.FC<DiscussionListProps> = ({
       <div className="text-center py-12">
         <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <p className="text-gray-500 text-lg mb-4">No discussions yet</p>
-        {onAddDiscussion && (
+        {onAddDiscussion ? (
           <button
             onClick={onAddDiscussion}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+            className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
           >
-            Start a Discussion
+            <Plus className="w-5 h-5" />
+            <span>Start a Discussion</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => alert('Add Discussion functionality not available')}
+            className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Start a Discussion</span>
           </button>
         )}
       </div>

@@ -107,13 +107,24 @@ const SyllabusList: React.FC<SyllabusListProps> = ({
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 text-lg mb-4">No syllabus data available.</p>
-        {userRole === 'teacher' && onAddSyllabus && (
+        {userRole === 'teacher' && onAddSyllabus ? (
           <button
             onClick={onAddSyllabus}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+            className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
           >
-            Add Syllabus Item
+            <Plus className="w-5 h-5" />
+            <span>Add Syllabus Item</span>
           </button>
+        ) : (
+          onAddSyllabus && (
+            <button
+              onClick={onAddSyllabus}
+              className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Add Syllabus Item</span>
+            </button>
+          )
         )}
       </div>
     );
@@ -229,6 +240,7 @@ const SyllabusList: React.FC<SyllabusListProps> = ({
 };
 
 export default SyllabusList;
+
 
 
 

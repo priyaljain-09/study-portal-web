@@ -17,14 +17,16 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
   subjectId,
   classroomId,
   userRole,
+  subjectName,
   onAddAnnouncement,
   onAnnouncementClick,
+  onEditAnnouncement,
 }) => {
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<number | null>(null);
   const [deletingAnnouncementId, setDeletingAnnouncementId] = useState<number | null>(null);
 
   const { data: announcementsData, isLoading } = useGetAnnouncementsBySubjectQuery(
-    subjectId,
+    { subjectId, classroomId },
     {
       skip: !subjectId,
     }
@@ -66,8 +68,9 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
 
   const handleEdit = (announcement: any) => {
     setSelectedAnnouncementId(null);
-    // Navigate to edit announcement page or show modal
-    alert('Edit Announcement functionality - to be implemented');
+    if (onEditAnnouncement) {
+      onEditAnnouncement(announcement);
+    }
   };
 
   const handleDelete = async (announcementId: number) => {
@@ -95,20 +98,34 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
     );
   }
 
-  const announcements = announcementsData?.announcements || [];
+  // Handle both array response and object with announcements property
+  const announcements = Array.isArray(announcementsData) 
+    ? announcementsData 
+    : (announcementsData?.announcements || []);
 
   if (announcements.length === 0) {
     return (
       <div className="text-center py-12">
         <Megaphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <p className="text-gray-500 text-lg mb-4">No announcements yet</p>
-        {userRole === 'teacher' && onAddAnnouncement && (
+        {userRole === 'teacher' && onAddAnnouncement ? (
           <button
             onClick={onAddAnnouncement}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+            className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
           >
-            Create Announcement
+            <Plus className="w-5 h-5" />
+            <span>Create Announcement</span>
           </button>
+        ) : (
+          onAddAnnouncement && (
+            <button
+              onClick={onAddAnnouncement}
+              className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Create Announcement</span>
+            </button>
+          )
         )}
       </div>
     );
