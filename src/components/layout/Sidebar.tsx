@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../redux/hooks';
 import { logout } from '../../redux/slices/applicationSlice';
-import { Home, Calendar, User, Settings, LogOut } from 'lucide-react';
+import { Home, Calendar, User, Settings, LogOut, BookOpen } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -25,7 +25,8 @@ const Sidebar = ({ activePath = '/dashboard', className = '' }: SidebarProps) =>
   };
 
   const navItems: NavItem[] = [
-    { label: 'My Courses', icon: Home, path: '/dashboard' },
+    { label: 'Dashboard', icon: Home, path: '/dashboard' },
+    { label: 'My Courses', icon: BookOpen, path: '/courses' },
     { label: 'Calendar', icon: Calendar, path: '/calendar' },
     { label: 'Profile', icon: User, path: '/profile' },
     { label: 'Settings', icon: Settings, path: '/settings' },
@@ -43,11 +44,12 @@ const Sidebar = ({ activePath = '/dashboard', className = '' }: SidebarProps) =>
     <div className={`w-64 bg-gradient-to-b from-purple-600 to-blue-600 text-white flex flex-col h-screen ${className}`}>
       {/* Logo/Brand */}
       <div className="p-6">
-        <h1 className="text-2xl font-bold">Strov</h1>
+        <h1 className="text-2xl font-bold">EduHub</h1>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-4">
+        <p className="text-xs font-semibold text-purple-200 uppercase tracking-wider mb-3 px-3">Navigation</p>
         <ul className="space-y-2">
           {navItems.map((item) => {
             const isActive = activePath === item.path;
