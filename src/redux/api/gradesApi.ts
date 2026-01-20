@@ -34,7 +34,7 @@ export const gradesApi = createApi({
         url: `/users/grade/${id}/`,
         method: 'GET',
       }),
-      providesTags: (result, error, id) => [{ type: 'Grade', id }],
+      providesTags: (_result, _error, id) => [{ type: 'Grade', id }],
       keepUnusedDataFor: 600,
     }),
     // Create grade (teacher only)

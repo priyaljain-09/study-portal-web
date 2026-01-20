@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import Sidebar from '../components/layout/Sidebar';
@@ -15,7 +15,7 @@ const ChapterDetail = () => {
   const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
 
   // Get data from location state
-  const { chapter, module, subjectName, classroomId: classroomIdFromState } = location.state || {};
+  const { module, subjectName, classroomId: classroomIdFromState } = location.state || {};
   
   // Get classroomId from URL params or location state
   const classroomId = classroomIdParam ? Number(classroomIdParam) : classroomIdFromState;

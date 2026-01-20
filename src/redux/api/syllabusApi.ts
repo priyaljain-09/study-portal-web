@@ -25,7 +25,7 @@ export const syllabusApi = createApi({
         url: `/users/syllabus/${id}/`,
         method: 'GET',
       }),
-      providesTags: (result, error, id) => [{ type: 'SyllabusItem', id }],
+      providesTags: (_result, _error, id) => [{ type: 'SyllabusItem', id }],
       keepUnusedDataFor: 600,
     }),
     // Create syllabus item (teacher only)

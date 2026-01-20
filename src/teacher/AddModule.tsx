@@ -34,7 +34,7 @@ const AddModule = () => {
   const [createModule, { isLoading: isCreatingModule }] = useCreateModuleMutation();
   const [createChapter, { isLoading: isCreatingChapter }] = useCreateChapterMutation();
   const [updateChapter, { isLoading: isUpdatingChapter }] = useUpdateChapterMutation();
-  const [uploadMaterial, { isLoading: isUploadingMaterial }] = useUploadMaterialMutation();
+  const [uploadMaterial] = useUploadMaterialMutation();
 
   const [currentStep, setCurrentStep] = useState<number>(isEditMode || existingModuleId ? 1 : 0);
   const [moduleName, setModuleName] = useState<string>(module?.name || '');

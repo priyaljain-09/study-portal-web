@@ -70,8 +70,6 @@ const DiscussionDetail = () => {
   const [menuVisibleForReplyId, setMenuVisibleForReplyId] = useState<number | null>(null);
   const [editingReply, setEditingReply] = useState<any>(null);
   const [editReplyText, setEditReplyText] = useState('');
-  const [likedReplies, setLikedReplies] = useState<Set<number>>(new Set());
-  const [replyLikeCounts, setReplyLikeCounts] = useState<Record<number, number>>({});
   const [likingReplyId, setLikingReplyId] = useState<number | null>(null);
   const [updatingReplyId, setUpdatingReplyId] = useState<number | null>(null);
   const [deletingReplyId, setDeletingReplyId] = useState<number | null>(null);
@@ -81,24 +79,6 @@ const DiscussionDetail = () => {
     userProfile?.user?.username?.charAt(0) ||
     'S';
 
-  // Initialize liked replies and counts from API response
-  useEffect(() => {
-    if (discussionDetails?.replies) {
-      const likedSet = new Set<number>();
-      const counts: Record<number, number> = {};
-
-      discussionDetails.replies.forEach((reply: any) => {
-        const isLiked = reply.liked_by_me === true || reply.is_liked_by_me === true;
-        if (isLiked) {
-          likedSet.add(reply.id);
-        }
-        counts[reply.id] = reply.like_count || 0;
-      });
-
-      setLikedReplies(likedSet);
-      setReplyLikeCounts(counts);
-    }
-  }, [discussionDetails?.replies]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -220,16 +200,7 @@ const DiscussionDetail = () => {
     deleteReply(replyId)
       .unwrap()
       .then(() => {
-        setLikedReplies(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(replyId);
-          return newSet;
-        });
-        setReplyLikeCounts(prev => {
-          const newObj = { ...prev };
-          delete newObj[replyId];
-          return newObj;
-        });
+        // Reply deleted successfully, cache will be updated automatically
       })
       .catch((error) => {
         console.error('Error deleting reply:', error);

@@ -15,7 +15,7 @@ const AssignmentDetail = () => {
   const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
 
   // Get data from location state
-  const { assignment, subjectName, courseColor, course } = location.state || {};
+  const { assignment, courseColor, course } = location.state || {};
 
   const { data: assignmentDetail, isLoading } = useGetAssignmentByIdQuery(Number(assignmentId), {
     skip: !assignmentId,

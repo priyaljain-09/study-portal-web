@@ -58,9 +58,6 @@ const SyllabusList: React.FC<SyllabusListProps> = ({
     }
   };
 
-  const handleCloseMenu = () => {
-    setSelectedItemId(null);
-  };
 
   const handleEditSyllabus = (item: any) => {
     setSelectedItemId(null);
