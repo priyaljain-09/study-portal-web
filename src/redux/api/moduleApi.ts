@@ -30,7 +30,7 @@ export const moduleApi = createApi({
         url: `/users/chapter/${id}/`,
         method: 'GET',
       }),
-      providesTags: (result, error, id) => [{ type: 'Chapter', id }],
+      providesTags: (_result, _error, id) => [{ type: 'Chapter', id }],
       keepUnusedDataFor: 600,
     }),
     // Create module (teacher only)

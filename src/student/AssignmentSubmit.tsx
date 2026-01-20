@@ -5,13 +5,13 @@ import Header from '../components/layout/Header';
 import { CheckCircle2, ClipboardList } from 'lucide-react';
 
 const AssignmentSubmit = () => {
-  const { subjectId, assignmentId } = useParams<{ subjectId: string; assignmentId: string }>();
+  const { subjectId } = useParams<{ subjectId: string; assignmentId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
 
   // Get data from location state
-  const { course, courseColor } = location.state || {};
+  const { course } = location.state || {};
 
   const userInitial = userProfile?.user?.first_name?.charAt(0) ||
     userProfile?.user?.username?.charAt(0) ||

@@ -30,7 +30,6 @@ interface PeopleListProps {
 const PeopleList: React.FC<PeopleListProps> = ({
   subjectId,
   classroomId,
-  userRole,
   onPersonClick,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
