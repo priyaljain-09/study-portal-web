@@ -5,23 +5,39 @@ import Header from '../components/layout/Header';
 import { CheckCircle2, ClipboardList } from 'lucide-react';
 
 const AssignmentSubmit = () => {
-  const { subjectId } = useParams<{ subjectId: string; assignmentId: string }>();
+  const { subjectId, assignmentId, classroomId: classroomIdParam } = useParams<{ 
+    subjectId: string; 
+    assignmentId?: string;
+    classroomId?: string;
+  }>();
   const navigate = useNavigate();
   const location = useLocation();
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
+  const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
 
   // Get data from location state
-  const { course } = location.state || {};
+  const { course, classroomId: classroomIdFromState, subjectName } = location.state || {};
+  
+  // Get classroomId from URL params or location state
+  const classroomId = classroomIdParam ? Number(classroomIdParam) : classroomIdFromState;
 
   const userInitial = userProfile?.user?.first_name?.charAt(0) ||
     userProfile?.user?.username?.charAt(0) ||
     'S';
 
+  // Helper function to get the correct route path based on user role
+  const getRoutePath = (path: string) => {
+    if (userRole === 'teacher' && classroomId) {
+      return `/classroom/${classroomId}${path}`;
+    }
+    return path;
+  };
+
   const handleBackToAssignments = () => {
-    navigate(`/subject/${subjectId}`, {
+    navigate(getRoutePath(`/subject/${subjectId}?tab=assignment`), {
       state: {
-        subjectName: course?.title,
-        classroomId: course?.classroomId,
+        subjectName: subjectName || course?.title,
+        classroomId,
       }
     });
   };
@@ -35,7 +51,7 @@ const AssignmentSubmit = () => {
         <Header
           userInitial={userInitial}
           userName={userProfile?.user?.first_name || userProfile?.user?.username}
-          onBackClick={() => navigate(`/subject/${subjectId}`)}
+          onBackClick={handleBackToAssignments}
         />
 
         {/* Main Content */}

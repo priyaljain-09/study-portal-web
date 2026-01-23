@@ -5,7 +5,7 @@ import { setShowToast } from '../slices/applicationSlice';
 export const assignmentApi = createApi({
   reducerPath: 'assignmentApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Assignments', 'Assignment', 'StudentAssignments'],
+  tagTypes: ['Assignments', 'Assignment', 'StudentAssignments', 'AssignmentQuestions'],
   endpoints: (builder) => ({
     getTeacherAssignments: builder.query<
       any[],
@@ -224,6 +224,104 @@ export const assignmentApi = createApi({
       }),
       invalidatesTags: ['Assignments', 'Assignment'],
     }),
+    // Get assignment questions
+    getAssignmentQuestions: builder.query<any[], number>({
+      query: (assignmentId) => ({
+        url: `/users/teacher/assignment/${assignmentId}/questions/`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error, assignmentId) => [
+        { type: 'AssignmentQuestions', id: assignmentId },
+        'AssignmentQuestions',
+      ],
+      keepUnusedDataFor: 300,
+    }),
+    // Create assignment question
+    createAssignmentQuestion: builder.mutation<
+      any,
+      { assignmentId: number; questionData: any }
+    >({
+      query: ({ assignmentId, questionData }) => ({
+        url: `/users/teacher/assignment/${assignmentId}/questions/`,
+        method: 'POST',
+        body: questionData,
+      }),
+      invalidatesTags: (_result, _error, { assignmentId }) => [
+        { type: 'AssignmentQuestions', id: assignmentId },
+        'AssignmentQuestions',
+        { type: 'Assignment', id: assignmentId },
+      ],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            setShowToast({
+              show: true,
+              type: 'success',
+              toastMessage: 'Question created successfully!',
+            }),
+          );
+        } catch (error) {
+          // Error toast is handled by baseQueryWithReauth
+        }
+      },
+    }),
+    // Update assignment question
+    updateAssignmentQuestion: builder.mutation<
+      any,
+      { questionId: number; questionData: any }
+    >({
+      query: ({ questionId, questionData }) => ({
+        url: `/users/teacher/question/${questionId}/`,
+        method: 'PUT',
+        body: questionData,
+      }),
+      invalidatesTags: ['AssignmentQuestions'],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            setShowToast({
+              show: true,
+              type: 'success',
+              toastMessage: 'Question updated successfully!',
+            }),
+          );
+        } catch (error) {
+          // Error toast is handled by baseQueryWithReauth
+        }
+      },
+    }),
+    // Delete assignment question
+    deleteAssignmentQuestion: builder.mutation<any, number>({
+      query: (questionId) => ({
+        url: `/users/teacher/question/${questionId}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['AssignmentQuestions'],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            setShowToast({
+              show: true,
+              type: 'success',
+              toastMessage: 'Question deleted successfully!',
+            }),
+          );
+        } catch (error) {
+          // Error toast is handled by baseQueryWithReauth
+        }
+      },
+    }),
+    // Delete assignment question option
+    deleteAssignmentOption: builder.mutation<any, number>({
+      query: (optionId) => ({
+        url: `/users/teacher/question/option/${optionId}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['AssignmentQuestions'],
+    }),
   }),
 });
 
@@ -237,6 +335,12 @@ export const {
   useSubmitStudentAssignmentMutation,
   useLazyGetTeacherAssignmentsQuery,
   useLazyGetStudentAssignmentsQuery,
+  // Question management
+  useGetAssignmentQuestionsQuery,
+  useCreateAssignmentQuestionMutation,
+  useUpdateAssignmentQuestionMutation,
+  useDeleteAssignmentQuestionMutation,
+  useDeleteAssignmentOptionMutation,
   // Backward compatibility exports
   useGetAssignmentByIdQuery,
   useGetSubmissionByIdQuery,

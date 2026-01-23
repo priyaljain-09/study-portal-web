@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../redux/slices/applicationSlice';
-import { GraduationCap, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { GraduationCap, Mail, Lock, Eye, EyeOff, Users } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../redux/store';
 import Input from '../components/ui/Input';
@@ -10,12 +10,12 @@ import Button from '../components/ui/Button';
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const role = "teacher";
   const { isLoading, successLogin, userRole } = useSelector((state: RootState) => state.applicationData);
   
   const [schoolCode, setSchoolCode] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'teacher' | 'student'>('teacher');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -74,6 +74,36 @@ const Login = () => {
           {/* Login Form */}
           <div className="w-full flex flex-col gap-2 p-4">
             <form onSubmit={handleLogin} className="w-full flex-col gap-4 flex">
+              {/* Role Selection */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="role" className="text-sm font-medium text-gray-700">
+                  Login As
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    {role === 'teacher' ? (
+                      <GraduationCap className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <Users className="h-5 w-5 text-gray-400" />
+                    )}
+                  </div>
+                  <select
+                    id="role"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as 'teacher' | 'student')}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white text-gray-900"
+                  >
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
               {/* School Code */}
               <Input
                 id="schoolCode"

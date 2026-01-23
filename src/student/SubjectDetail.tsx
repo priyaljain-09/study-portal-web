@@ -258,8 +258,14 @@ const SubjectDetail = () => {
             classroomId={classroomId}
             userRole={userRole}
             onPersonClick={(person) => {
-              // Navigate to person detail page
-              alert(`Person Detail: ${person.name} - to be implemented`);
+              navigate(getRoutePath(`/subject/${subjectId}/person/${person.id}`), {
+                state: {
+                  person,
+                  courseColor: subjectColor,
+                  subjectName,
+                  classroomId,
+                },
+              });
             }}
           />
         );
@@ -271,11 +277,20 @@ const SubjectDetail = () => {
             classroomId={classroomId}
             userRole={userRole}
             onAddAssignment={() => {
-              // Navigate to add assignment page or show modal
-              alert('Add Assignment functionality - to be implemented');
+              navigate(getRoutePath(`/subject/${subjectId}/add-assignment?tab=assignment`), {
+                state: { subjectName, classroomId }
+              });
+            }}
+            onEditAssignment={(assignment) => {
+              navigate(getRoutePath(`/subject/${subjectId}/edit-assignment/${assignment.id}?tab=assignment`), {
+                state: { 
+                  assignment, 
+                  subjectName, 
+                  classroomId
+                }
+              });
             }}
             onAssignmentClick={(assignment) => {
-              // Navigate to assignment detail page
               navigate(getRoutePath(`/subject/${subjectId}/assignment/${assignment.id}`), {
                 state: { 
                   assignment, 

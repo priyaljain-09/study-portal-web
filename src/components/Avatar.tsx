@@ -7,6 +7,26 @@ interface AvatarProps {
 }
 
 const Avatar: React.FC<AvatarProps> = ({ label, size = 40, className = '' }) => {
+  // Predefined palette of attractive colors
+  const colorPalette = [
+    '#8B5CF6', // Purple
+    '#EC4899', // Pink
+    '#F59E0B', // Amber
+    '#10B981', // Emerald
+    '#3B82F6', // Blue
+    '#EF4444', // Red
+    '#06B6D4', // Cyan
+    '#84CC16', // Lime
+    '#F97316', // Orange
+    '#6366F1', // Indigo
+    '#14B8A6', // Teal
+    '#A855F7', // Violet
+    '#F43F5E', // Rose
+    '#0EA5E9', // Sky
+    '#22C55E', // Green
+    '#EAB308', // Yellow
+  ];
+
   // Get initials from label
   const getInitials = (name: string): string => {
     if (!name) return '?';
@@ -14,11 +34,21 @@ const Avatar: React.FC<AvatarProps> = ({ label, size = 40, className = '' }) => 
     if (parts.length >= 2) {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
-    return name.substring(0, 2).toUpperCase();
+    return name.substring(0, 1).toUpperCase();
+  };
+
+  // Generate a consistent color index based on the label
+  const getColorIndex = (name: string): number => {
+    if (!name) return 0;
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash) % colorPalette.length;
   };
 
   const initials = getInitials(label);
-  const backgroundColor = `hsl(${label.charCodeAt(0) % 360}, 70%, 50%)`;
+  const backgroundColor = colorPalette[getColorIndex(label)];
 
   return (
     <div
