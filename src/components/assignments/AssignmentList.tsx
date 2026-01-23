@@ -22,6 +22,7 @@ interface AssignmentListProps {
   userRole: string;
   onAddAssignment?: () => void;
   onAssignmentClick?: (assignment: any) => void;
+  onEditAssignment?: (assignment: any) => void;
 }
 
 const AssignmentList: React.FC<AssignmentListProps> = ({
@@ -30,6 +31,7 @@ const AssignmentList: React.FC<AssignmentListProps> = ({
   userRole,
   onAddAssignment,
   onAssignmentClick,
+  onEditAssignment,
 }) => {
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null);
   const [deletingAssignmentId, setDeletingAssignmentId] = useState<number | null>(null);
@@ -117,14 +119,20 @@ const AssignmentList: React.FC<AssignmentListProps> = ({
   const handleClick = (assignment: any) => {
     if (selectedAssignmentId === assignment.id) {
       setSelectedAssignmentId(null);
+    } else if (isTeacher && onEditAssignment) {
+      // For teachers, clicking on assignment opens edit page
+      onEditAssignment(assignment);
     } else if (onAssignmentClick) {
+      // For students, clicking opens detail page
       onAssignmentClick(assignment);
     }
   };
 
   const handleEdit = (assignment: any) => {
     setSelectedAssignmentId(null);
-    if (onAssignmentClick) {
+    if (onEditAssignment) {
+      onEditAssignment(assignment);
+    } else if (onAssignmentClick) {
       onAssignmentClick(assignment);
     }
   };

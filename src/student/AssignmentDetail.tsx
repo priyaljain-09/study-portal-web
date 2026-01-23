@@ -8,14 +8,35 @@ import HTMLContentViewer from '../components/HTMLContentViewer';
 import { ClipboardList, Upload, FileText } from 'lucide-react';
 
 const AssignmentDetail = () => {
-  const { subjectId, assignmentId } = useParams<{ subjectId: string; assignmentId: string }>();
+  const { subjectId, assignmentId, classroomId: classroomIdParam } = useParams<{ 
+    subjectId: string; 
+    assignmentId: string; 
+    classroomId?: string;
+  }>();
   const navigate = useNavigate();
   const location = useLocation();
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
   const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
 
   // Get data from location state
-  const { assignment, courseColor, course } = location.state || {};
+  const { assignment, courseColor, course, classroomId: classroomIdFromState, subjectName } = location.state || {};
+  
+  // Get classroomId from URL params or location state
+  const classroomId = classroomIdParam ? Number(classroomIdParam) : classroomIdFromState;
+
+  // Helper function to get the correct route path based on user role
+  const getRoutePath = (path: string) => {
+    if (userRole === 'teacher' && classroomId) {
+      return `/classroom/${classroomId}${path}`;
+    }
+    return path;
+  };
+
+  const handleBack = () => {
+    navigate(getRoutePath(`/subject/${subjectId}?tab=assignment`), {
+      state: { subjectName, classroomId }
+    });
+  };
 
   const { data: assignmentDetail, isLoading } = useGetAssignmentByIdQuery(Number(assignmentId), {
     skip: !assignmentId,
@@ -61,7 +82,7 @@ const AssignmentDetail = () => {
           <Header
             userInitial={userInitial}
             userName={userProfile?.user?.first_name || userProfile?.user?.username}
-            onBackClick={() => navigate(`/subject/${subjectId}`)}
+            onBackClick={handleBack}
           />
           <div className="flex-1 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
@@ -79,7 +100,7 @@ const AssignmentDetail = () => {
           <Header
             userInitial={userInitial}
             userName={userProfile?.user?.first_name || userProfile?.user?.username}
-            onBackClick={() => navigate(`/subject/${subjectId}`)}
+            onBackClick={handleBack}
           />
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
@@ -104,7 +125,7 @@ const AssignmentDetail = () => {
         <Header
           userInitial={userInitial}
           userName={userProfile?.user?.first_name || userProfile?.user?.username}
-          onBackClick={() => navigate(`/subject/${subjectId}`)}
+          onBackClick={handleBack}
         />
 
         {/* Main Content - Scrollable */}
