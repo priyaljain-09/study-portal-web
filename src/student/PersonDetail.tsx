@@ -5,25 +5,8 @@ import Header from '../components/layout/Header';
 import Avatar from '../components/Avatar';
 import { Mail, Phone, MessageCircle, GraduationCap, Users } from 'lucide-react';
 
-interface Person {
-  id: number;
-  name: string;
-  email: string;
-  phone?: string;
-  role: 'teacher' | 'student' | 'assistant';
-  avatar?: string;
-  department?: string;
-  status: 'online' | 'offline' | 'away';
-  lastSeen?: string;
-  tag?: string;
-  grade?: string;
-  enrollment_number?: string;
-  roll_number?: string;
-  qualification?: string;
-}
-
 const PersonDetail = () => {
-  const { subjectId, personId, classroomId: classroomIdParam } = useParams<{ 
+  const { subjectId, classroomId: classroomIdParam } = useParams<{ 
     subjectId: string; 
     personId: string; 
     classroomId?: string;

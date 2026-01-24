@@ -13,6 +13,7 @@ import AnnouncementList from '../components/announcements/AnnouncementList';
 import SyllabusList from '../components/syllabus/SyllabusList';
 import PeopleList from '../components/people/PeopleList';
 import AssignmentList from '../components/assignments/AssignmentList';
+import GradesList from '../components/grades/GradesList';
 import { BookOpen, MessageSquare, Bell, FileText, Award, Users, ClipboardList } from 'lucide-react';
 
 const SubjectDetail = () => {
@@ -245,10 +246,32 @@ const SubjectDetail = () => {
 
       case 'grades':
         return (
-          <div className="text-center py-12">
-            <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">Grades tab - API integration pending</p>
-          </div>
+          <GradesList
+            subjectId={Number(subjectId)}
+            classroomId={classroomId}
+            userRole={userRole}
+            courseColor={subjectColor}
+            onAssignmentClick={(assignment) => {
+              navigate(getRoutePath(`/subject/${subjectId}/assignment/${assignment.id}/grades`), {
+                state: { 
+                  assignment, 
+                  subjectName, 
+                  classroomId,
+                  courseColor: subjectColor,
+                  course: { id: Number(subjectId), title: subjectName, color: subjectColor }
+                }
+              });
+            }}
+            onGradeClick={(grade) => {
+              navigate(`/subject/${subjectId}/grade/${grade.id}`, {
+                state: { 
+                  grade, 
+                  courseColor: subjectColor,
+                  subjectName
+                }
+              });
+            }}
+          />
         );
 
       case 'people':

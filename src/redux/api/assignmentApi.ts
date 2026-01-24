@@ -5,7 +5,7 @@ import { setShowToast } from '../slices/applicationSlice';
 export const assignmentApi = createApi({
   reducerPath: 'assignmentApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Assignments', 'Assignment', 'StudentAssignments', 'AssignmentQuestions'],
+  tagTypes: ['Assignments', 'Assignment', 'StudentAssignments', 'StudentAssignmentQuestions', 'AssignmentQuestions'],
   endpoints: (builder) => ({
     getTeacherAssignments: builder.query<
       any[],
@@ -33,6 +33,18 @@ export const assignmentApi = createApi({
       providesTags: (_result, _error, subjectId) => [
         { type: 'StudentAssignments', id: subjectId },
         'StudentAssignments',
+      ],
+      keepUnusedDataFor: 300,
+    }),
+    // Get student assignment with questions (for viewing/answering)
+    getStudentAssignmentQuestions: builder.query<any, number>({
+      query: (assignmentId) => ({
+        url: `/users/assignments/${assignmentId}/`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error, assignmentId) => [
+        { type: 'StudentAssignmentQuestions', id: assignmentId },
+        'StudentAssignmentQuestions',
       ],
       keepUnusedDataFor: 300,
     }),
@@ -173,14 +185,25 @@ export const assignmentApi = createApi({
       any,
       { assignmentId: number; subjectId: number; answers: Array<{ question_id: number; answer: string | number }> }
     >({
-      query: ({ assignmentId, answers }) => ({
-        url: `/users/assignments/${assignmentId}/submit/mixed/`,
-        method: 'POST',
-        body: answers,
-      }),
-      invalidatesTags: (_result, _error, { subjectId }) => [
+      query: ({ assignmentId, answers }) => {
+        // Ensure answers are properly formatted
+        // MCQ answers should be numbers, text answers should be strings
+        const formattedAnswers = answers.map((item) => ({
+          question_id: Number(item.question_id),
+          answer: item.answer, // Keep as-is (number for MCQ, string for text)
+        }));
+        
+        return {
+          url: `/users/assignments/${assignmentId}/submit/mixed/`,
+          method: 'POST',
+          body: formattedAnswers,
+        };
+      },
+      invalidatesTags: (_result, _error, { subjectId, assignmentId }) => [
         { type: 'StudentAssignments', id: subjectId },
         'StudentAssignments',
+        { type: 'StudentAssignmentQuestions', id: assignmentId },
+        'StudentAssignmentQuestions',
       ],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
@@ -197,15 +220,8 @@ export const assignmentApi = createApi({
         }
       },
     }),
-    // Get assignment by ID (for backward compatibility)
-    getAssignmentById: builder.query<any, number>({
-      query: (id) => ({
-        url: `/users/assignment/${id}/`,
-        method: 'GET',
-      }),
-      providesTags: (_result, _error, id) => [{ type: 'Assignment', id }],
-      keepUnusedDataFor: 600,
-    }),
+    // Note: Use getTeacherAssignmentByIdQuery for teachers or getStudentAssignmentQuestionsQuery for students
+    // This endpoint (/users/assignment/${id}/) doesn't exist in the API
     // Get submission by ID
     getSubmissionById: builder.query<any, number>({
       query: (id) => ({
@@ -328,6 +344,7 @@ export const assignmentApi = createApi({
 export const {
   useGetTeacherAssignmentsQuery,
   useGetStudentAssignmentsQuery,
+  useGetStudentAssignmentQuestionsQuery,
   useGetTeacherAssignmentByIdQuery,
   useCreateTeacherAssignmentMutation,
   useUpdateTeacherAssignmentMutation,
@@ -335,6 +352,7 @@ export const {
   useSubmitStudentAssignmentMutation,
   useLazyGetTeacherAssignmentsQuery,
   useLazyGetStudentAssignmentsQuery,
+  useLazyGetStudentAssignmentQuestionsQuery,
   // Question management
   useGetAssignmentQuestionsQuery,
   useCreateAssignmentQuestionMutation,
@@ -342,7 +360,6 @@ export const {
   useDeleteAssignmentQuestionMutation,
   useDeleteAssignmentOptionMutation,
   // Backward compatibility exports
-  useGetAssignmentByIdQuery,
   useGetSubmissionByIdQuery,
   useGradeSubmissionMutation,
 } = assignmentApi;

@@ -2,12 +2,11 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
-import { CheckCircle2, ClipboardList } from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 
 const AssignmentSubmit = () => {
-  const { subjectId, assignmentId, classroomId: classroomIdParam } = useParams<{ 
+  const { subjectId, classroomId: classroomIdParam } = useParams<{ 
     subjectId: string; 
-    assignmentId?: string;
     classroomId?: string;
   }>();
   const navigate = useNavigate();
@@ -56,43 +55,36 @@ const AssignmentSubmit = () => {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto bg-white">
-          <div className="flex items-center justify-center min-h-full px-8 py-12">
+          <div className="flex items-center justify-center min-h-full px-5 py-12">
             <div className="max-w-2xl w-full text-center">
-              {/* Success Icon */}
-              <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="w-16 h-16 text-green-600" />
-                </div>
-              </div>
-
               {/* Heading */}
               <h2 className="text-base font-semibold text-gray-900 mb-2">
                 Submission
               </h2>
 
               {/* Title */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              <h1 className="text-2xl font-bold text-gray-900 mb-3">
                 Assignment Submitted
               </h1>
 
               {/* Description */}
-              <p className="text-base text-gray-600 mb-12 max-w-md mx-auto leading-relaxed">
+              <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto leading-relaxed px-4">
                 Your assignment has been successfully submitted. You can view your
                 submission in the assignments list.
               </p>
 
               {/* Illustration/Icon */}
-              <div className="flex justify-center mb-12">
-                <div className="w-72 h-48 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center">
+              <div className="flex justify-center mb-10">
+                <div className="w-[280px] h-[180px] bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center">
                   <ClipboardList className="w-32 h-32 text-purple-600 opacity-50" />
                 </div>
               </div>
 
               {/* Back Button */}
-              <div className="flex justify-center">
+              <div className="px-5 pb-10">
                 <button
                   onClick={handleBackToAssignments}
-                  className="px-8 py-4 bg-blue-100 text-gray-900 rounded-full font-semibold text-base hover:bg-blue-200 transition shadow-sm min-w-[200px]"
+                  className="w-full py-3.5 px-5 rounded-full font-semibold text-base bg-blue-100 text-gray-900 hover:bg-blue-200 transition min-h-[50px]"
                 >
                   Back to Assignments
                 </button>
