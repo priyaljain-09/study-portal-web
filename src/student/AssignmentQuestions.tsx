@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
-import { useGetAssignmentByIdQuery, useSubmitStudentAssignmentMutation } from '../redux/api/assignmentApi';
-import { ArrowLeft, Circle, CheckCircle2 } from 'lucide-react';
+import { useGetStudentAssignmentQuestionsQuery, useSubmitStudentAssignmentMutation } from '../redux/api/assignmentApi';
+import { Circle, CheckCircle2 } from 'lucide-react';
 
 const AssignmentQuestions = () => {
   const { subjectId, assignmentId } = useParams<{ subjectId: string; assignmentId: string }>();
@@ -13,9 +13,9 @@ const AssignmentQuestions = () => {
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
 
   // Get data from location state
-  const { assignment: assignmentFromState, courseColor, course } = location.state || {};
+  const { courseColor, course } = location.state || {};
 
-  const { data: assignmentData, isLoading } = useGetAssignmentByIdQuery(Number(assignmentId), {
+  const { data: studentAssignmentQuestions, isLoading } = useGetStudentAssignmentQuestionsQuery(Number(assignmentId), {
     skip: !assignmentId,
   });
 
@@ -24,16 +24,11 @@ const AssignmentQuestions = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
 
-  // Use assignmentData from API if available, otherwise use from state
-  const assignment = assignmentData || assignmentFromState;
-
   const userInitial = userProfile?.user?.first_name?.charAt(0) ||
     userProfile?.user?.username?.charAt(0) ||
     'S';
 
-  const questions = useMemo(() => {
-    return assignment?.questions || [];
-  }, [assignment?.questions]);
+  const questions = studentAssignmentQuestions?.questions || [];
 
   const handleMCQSelect = (questionId: number, optionId: number) => {
     setAnswers(prev => ({
@@ -50,15 +45,21 @@ const AssignmentQuestions = () => {
   };
 
   const handleSubmit = async () => {
-    if (!assignment || !questions || questions.length === 0) {
+    if (!studentAssignmentQuestions || !questions || questions.length === 0) {
       alert('Error: Questions not loaded. Please try again.');
       return;
     }
 
     // Check if all questions are answered
-    const unansweredQuestions = questions.filter(
-      (q: any) => !answers[q.id] || answers[q.id].trim() === ''
-    );
+    const unansweredQuestions = questions.filter((q: any) => {
+      const answer = answers[q.id];
+      if (!answer) return true;
+      // For text questions, check if trimmed answer is empty
+      if (q.question_type === 'text' && typeof answer === 'string') {
+        return answer.trim() === '';
+      }
+      return false;
+    });
 
     if (unansweredQuestions.length > 0) {
       alert(
@@ -67,21 +68,23 @@ const AssignmentQuestions = () => {
       return;
     }
 
-    // Build a map of question types for quick lookup
-    const questionTypeMap: { [key: number]: string } = {};
-    questions.forEach((q: any) => {
-      questionTypeMap[q.id] = q.question_type;
-    });
-
     const payload = questions.map((q: any) => {
       const answer = answers[q.id];
       const questionType = q.question_type;
 
-      // For MCQ questions, convert answer to integer (option_id)
-      // For text questions, keep as string
-      const formattedAnswer = questionType === 'mcq'
-        ? parseInt(answer, 10)
-        : answer;
+      // For MCQ questions, answer should be number (option_id)
+      // For text questions, answer should be string (trimmed)
+      let formattedAnswer: string | number;
+      if (questionType === 'mcq') {
+        // Convert option_id to number
+        formattedAnswer = parseInt(answer, 10);
+        if (isNaN(formattedAnswer)) {
+          throw new Error(`Invalid answer format for MCQ question ${q.id}`);
+        }
+      } else {
+        // Text question - trim and keep as string
+        formattedAnswer = typeof answer === 'string' ? answer.trim() : String(answer).trim();
+      }
 
       return {
         question_id: q.id,
@@ -115,12 +118,6 @@ const AssignmentQuestions = () => {
     }
   };
 
-  const handlePrevious = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex h-screen bg-gray-50">
@@ -139,7 +136,7 @@ const AssignmentQuestions = () => {
     );
   }
 
-  if (!assignment || !questions || questions.length === 0) {
+  if (!studentAssignmentQuestions || !questions || questions.length === 0) {
     return (
       <div className="flex h-screen bg-gray-50">
         <Sidebar activePath={`/subject/${subjectId}`} />
@@ -163,7 +160,6 @@ const AssignmentQuestions = () => {
   const totalQuestions = questions.length;
   const progressPercentage = ((currentQuestionIndex + 1) / totalQuestions) * 100;
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
-  const isFirstQuestion = currentQuestionIndex === 0;
 
   // Strip HTML tags from question text for display
   const getQuestionText = (html: string) => {
@@ -184,21 +180,16 @@ const AssignmentQuestions = () => {
         />
 
         {/* Main Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto bg-white" style={{ paddingBottom: '120px' }}>
-          <div className="p-8 max-w-4xl mx-auto">
+        <div className="flex-1 overflow-y-auto bg-white" style={{ paddingBottom: '100px' }}>
+          <div className="p-4 max-w-4xl mx-auto">
             {/* Progress Section */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-700">
-                  Question {currentQuestionIndex + 1} of {totalQuestions}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {Math.round(progressPercentage)}% Complete
-                </p>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-900 mb-2">
+                Question {currentQuestionIndex + 1}/{totalQuestions}
+              </p>
+              <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
                 <div
-                  className="bg-gray-400 h-2 rounded-full transition-all duration-300"
+                  className="bg-gray-400 h-1.5 rounded-full transition-all duration-300"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>
@@ -206,30 +197,26 @@ const AssignmentQuestions = () => {
 
             {/* Question Block */}
             {currentQuestion && (
-              <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-medium text-gray-900 mb-6">
                   {currentQuestionIndex + 1}. {getQuestionText(currentQuestion.question_text || '')}
                 </h2>
 
                 {/* MCQ Options */}
                 {currentQuestion.question_type === 'mcq' && currentQuestion.options && (
-                  <div className="space-y-4">
+                  <div className="space-y-5 ml-2.5">
                     {currentQuestion.options.map((option: any) => (
                       <button
                         key={option.id}
                         onClick={() => handleMCQSelect(currentQuestion.id, option.id)}
-                        className={`w-full flex items-center space-x-4 p-4 rounded-lg border-2 transition ${
-                          answers[currentQuestion.id] === option.id.toString()
-                            ? 'border-green-500 bg-green-50'
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                        }`}
+                        className="w-full flex items-center gap-2"
                       >
                         {answers[currentQuestion.id] === option.id.toString() ? (
-                          <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
                         ) : (
-                          <Circle className="w-6 h-6 text-gray-400 flex-shrink-0" />
+                          <Circle className="w-5 h-5 text-gray-400 flex-shrink-0" />
                         )}
-                        <span className="text-base text-gray-900 text-left flex-1">
+                        <span className="text-sm text-gray-700 text-left">
                           {option.text}
                         </span>
                       </button>
@@ -240,78 +227,44 @@ const AssignmentQuestions = () => {
                 {/* Text Input */}
                 {currentQuestion.question_type === 'text' && (
                   <textarea
-                    className="w-full min-h-[200px] p-4 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-y"
-                    placeholder="Type your answer here..."
+                    className="w-full min-h-[150px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-y text-sm"
+                    placeholder="Type your answer here"
                     value={answers[currentQuestion.id] || ''}
                     onChange={(e) => handleTextChange(currentQuestion.id, e.target.value)}
                   />
                 )}
               </div>
             )}
-
-            {/* Question Navigation Dots */}
-            <div className="flex items-center justify-center space-x-2 mb-6">
-              {questions.map((_: any, index: number) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentQuestionIndex(index)}
-                  className={`w-3 h-3 rounded-full transition ${
-                    index === currentQuestionIndex
-                      ? 'bg-purple-600 w-8'
-                      : answers[questions[index].id]
-                      ? 'bg-green-500'
-                      : 'bg-gray-300'
-                  }`}
-                  title={`Question ${index + 1}`}
-                />
-              ))}
-            </div>
           </div>
         </div>
 
         {/* Fixed Bottom Navigation Bar */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-8 py-4 z-10 shadow-lg">
-          <div className="max-w-4xl mx-auto flex items-center justify-between space-x-4">
-            {/* Previous Button */}
-            <button
-              onClick={handlePrevious}
-              disabled={isFirstQuestion}
-              className={`px-6 py-3 rounded-lg font-semibold transition ${
-                isFirstQuestion
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <ArrowLeft className="w-5 h-5" />
-                <span>Previous</span>
-              </div>
-            </button>
-
-            {/* Submit/Next Button */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4 z-10 shadow-lg">
+          <div className="max-w-4xl mx-auto">
             {isLastQuestion ? (
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`flex-1 px-6 py-3 rounded-lg font-semibold text-white transition ${
+                className={`w-full py-3.5 rounded-lg font-semibold text-white transition ${
                   isSubmitting
                     ? 'bg-purple-400 cursor-not-allowed'
                     : 'bg-purple-600 hover:bg-purple-700'
                 }`}
+                style={{ backgroundColor: isSubmitting ? undefined : courseColor || '#8B5CF6' }}
               >
                 {isSubmitting ? (
-                  <div className="flex items-center justify-center space-x-2">
+                  <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     <span>Submitting...</span>
                   </div>
                 ) : (
-                  'Submit Assignment'
+                  'Submit'
                 )}
               </button>
             ) : (
               <button
                 onClick={handleNext}
-                className="flex-1 px-6 py-3 rounded-lg font-semibold bg-blue-100 text-gray-900 hover:bg-blue-200 transition"
+                className="w-full py-3.5 rounded-lg font-semibold bg-blue-100 text-gray-900 hover:bg-blue-200 transition"
               >
                 Next
               </button>

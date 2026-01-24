@@ -85,14 +85,12 @@ const AddAssignment = () => {
       setAssignmentType(assignment.assignment_type || 'file');
       setTotalMarks(assignment.total_marks || 0);
       if (assignment.due_date) {
-        // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
+        // Format date for date input (YYYY-MM-DD)
         const date = new Date(assignment.due_date);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        setDueDate(`${year}-${month}-${day}T${hours}:${minutes}`);
+        setDueDate(`${year}-${month}-${day}`);
       }
       if (assignment.id) {
         setCurrentAssignmentId(assignment.id);
@@ -137,12 +135,13 @@ const AddAssignment = () => {
     }
 
     try {
+      // Date input already provides YYYY-MM-DD format, use it directly
       const assignmentData = {
         title: title.trim(),
         description: description.trim(),
         assignment_type: assignmentType,
         total_marks: totalMarks,
-        due_date: new Date(dueDate).toISOString(),
+        due_date: dueDate, // Already in YYYY-MM-DD format from date input
       };
 
       if (isEditMode && assignmentId) {
@@ -498,7 +497,7 @@ const AddAssignment = () => {
                     Due Date <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="datetime-local"
+                    type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -516,7 +515,11 @@ const AddAssignment = () => {
                       : 'bg-purple-600 hover:bg-purple-700'
                   }`}
                 >
-                  {isSaving ? 'Saving...' : isEditMode ? 'Update Assignment' : 'Save Assignment'}
+                  {isSaving 
+                    ? 'Saving...' 
+                    : currentAssignmentId || isEditMode 
+                      ? 'Update Assignment' 
+                      : 'Save Assignment'}
                 </button>
               </div>
             </div>
@@ -569,7 +572,6 @@ const AddAssignment = () => {
                           key={index}
                           question={question}
                           questionNumber={questionNumber}
-                          primaryColor="#8B5CF6"
                           onUpdate={(field, value) => handleUpdateQuestion(index, field, value)}
                           onTypeChange={(type) => handleQuestionTypeChange(index, type)}
                           onAddOption={() => handleAddOption(index)}

@@ -18,7 +18,6 @@ interface Question {
 interface QuestionFormProps {
   question: Question;
   questionNumber: number;
-  primaryColor?: string;
   onUpdate: (field: string, value: any) => void;
   onTypeChange: (type: 'text' | 'mcq') => void;
   onAddOption: () => void;
@@ -33,7 +32,6 @@ interface QuestionFormProps {
 export const QuestionForm: React.FC<QuestionFormProps> = ({
   question,
   questionNumber,
-  primaryColor = '#8B5CF6',
   onUpdate,
   onTypeChange,
   onAddOption,
