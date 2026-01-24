@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseQuery';
+import { setShowToast } from '../slices/applicationSlice';
 
 export const syllabusApi = createApi({
   reducerPath: 'syllabusApi',
@@ -36,6 +37,20 @@ export const syllabusApi = createApi({
         body: syllabusData,
       }),
       invalidatesTags: ['Syllabus'],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            setShowToast({
+              show: true,
+              type: 'success',
+              toastMessage: 'Syllabus item created successfully!',
+            }),
+          );
+        } catch (error) {
+          // Error toast is handled by baseQueryWithReauth
+        }
+      },
     }),
     // Update syllabus item
     updateSyllabusItem: builder.mutation<any, { syllabusItemId: number; syllabusData: any }>({
@@ -45,6 +60,20 @@ export const syllabusApi = createApi({
         body: syllabusData,
       }),
       invalidatesTags: ['Syllabus', 'SyllabusItem'],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            setShowToast({
+              show: true,
+              type: 'success',
+              toastMessage: 'Syllabus item updated successfully!',
+            }),
+          );
+        } catch (error) {
+          // Error toast is handled by baseQueryWithReauth
+        }
+      },
     }),
     // Delete syllabus item
     deleteSyllabusItem: builder.mutation<any, number>({

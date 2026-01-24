@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../../redux/hooks';
+import { useAppSelector } from '../../redux/hooks';
 import Sidebar from '../layout/Sidebar';
 import Header from '../layout/Header';
-import { createSyllabusItem, updateSyllabusItemById } from '../../redux/slices/dashboard';
+import { useCreateSyllabusItemMutation, useUpdateSyllabusItemMutation } from '../../redux/api/syllabusApi';
 import RichTextEditor from '../editor/RichTextEditor';
 
 const AddSyllabus = () => {
   const { subjectId, syllabusItemId } = useParams<{ subjectId: string; syllabusItemId?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useAppDispatch();
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
   const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
-  const isLoading = useAppSelector((state) => state.applicationData.isLoading);
+  
+  const [createSyllabusItem, { isLoading: isCreating }] = useCreateSyllabusItemMutation();
+  const [updateSyllabusItem, { isLoading: isUpdating }] = useUpdateSyllabusItemMutation();
+  const isLoading = isCreating || isUpdating;
 
   // Get data from location state
   const { subjectName, classroomId, syllabusData, isEditMode: isEditModeFromState } = location.state || {};
@@ -66,9 +68,16 @@ const AddSyllabus = () => {
       };
 
       if (isEditMode && syllabusItemId) {
-        await dispatch(updateSyllabusItemById(Number(syllabusItemId), syllabusDataToSave));
+        await updateSyllabusItem({
+          syllabusItemId: Number(syllabusItemId),
+          syllabusData: syllabusDataToSave,
+        }).unwrap();
       } else if (classroomId) {
-        await dispatch(createSyllabusItem(classroomId, Number(subjectId), syllabusDataToSave));
+        await createSyllabusItem({
+          classroomId,
+          subjectId: Number(subjectId),
+          syllabusData: syllabusDataToSave,
+        }).unwrap();
       } else {
         alert('Classroom information is required');
         return;
@@ -79,7 +88,7 @@ const AddSyllabus = () => {
       });
     } catch (error) {
       console.error('Error saving syllabus:', error);
-      alert('Failed to save syllabus item. Please try again.');
+      // Error toast is handled by baseQueryWithReauth
     }
   };
 

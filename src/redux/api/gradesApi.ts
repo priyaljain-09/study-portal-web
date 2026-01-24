@@ -1,84 +1,152 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseQuery';
+import { setShowToast } from '../slices/applicationSlice';
 
 export const gradesApi = createApi({
   reducerPath: 'gradesApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Grades', 'Grade'],
+  tagTypes: ['TeacherGrades', 'SubjectGrades', 'GradeDetail', 'SubmissionDetail'],
   endpoints: (builder) => ({
-    // Get grades by subject (student)
-    getGradesBySubject: builder.query<any, { subjectId: number; classroomId?: number }>({
+    // Fetch teacher grades by subject
+    fetchTeacherGrades: builder.query<
+      any,
+      { subjectId: number; classroomId?: number }
+    >({
       query: ({ subjectId, classroomId }) => {
-        const params = classroomId ? { classroom_id: classroomId } : {};
+        const params: any = {};
+        if (classroomId) {
+          params.classroom_id = classroomId;
+        }
         return {
-          url: `/users/subjects/${subjectId}/grades/`,
+          url: `/users/teacher/assignment/${subjectId}/grades/`,
           method: 'GET',
           params,
         };
       },
-      providesTags: ['Grades'],
+      providesTags: (_result, _error, { subjectId, classroomId }) => [
+        { type: 'TeacherGrades', id: `${subjectId}-${classroomId || 'all'}` },
+        'TeacherGrades',
+      ],
       keepUnusedDataFor: 300,
     }),
-    // Get grades by subject and classroom (teacher)
-    getGradesBySubjectAndClassroom: builder.query<any, { subjectId: number; classroomId: number }>({
-      query: ({ subjectId, classroomId }) => ({
-        url: `/users/teacher/classrooms/${classroomId}/subjects/${subjectId}/grades/`,
+    // Fetch grades by subject (Student)
+    fetchGradesBySubject: builder.query<any, number>({
+      query: (subjectId) => ({
+        url: `/users/student/grades/${subjectId}/`,
         method: 'GET',
       }),
-      providesTags: ['Grades'],
+      providesTags: (_result, _error, subjectId) => [
+        { type: 'SubjectGrades', id: subjectId },
+        'SubjectGrades',
+      ],
       keepUnusedDataFor: 300,
     }),
-    // Get grade by ID
-    getGradeById: builder.query<any, number>({
-      query: (id) => ({
-        url: `/users/grade/${id}/`,
+    // Fetch grade detail by ID (Student)
+    fetchGradesById: builder.query<any, number>({
+      query: (gradeId) => ({
+        url: `/users/student/grade-detail/${gradeId}/`,
         method: 'GET',
       }),
-      providesTags: (_result, _error, id) => [{ type: 'Grade', id }],
+      providesTags: (_result, _error, gradeId) => [
+        { type: 'GradeDetail', id: gradeId },
+        'GradeDetail',
+      ],
       keepUnusedDataFor: 600,
     }),
-    // Create grade (teacher only)
-    createGrade: builder.mutation<any, { classroomId: number; subjectId: number; gradeData: any }>({
-      query: ({ classroomId, subjectId, gradeData }) => ({
-        url: `/users/teacher/classrooms/${classroomId}/subjects/${subjectId}/grades/`,
-        method: 'POST',
-        body: gradeData,
+    // Fetch submission detail by submission ID (Teacher)
+    fetchSubmissionDetail: builder.query<any, number>({
+      query: (submissionId) => ({
+        url: `/users/teacher/submission/${submissionId}/grade/`,
+        method: 'GET',
       }),
-      invalidatesTags: ['Grades'],
+      providesTags: (_result, _error, submissionId) => [
+        { type: 'SubmissionDetail', id: submissionId },
+        'SubmissionDetail',
+      ],
+      keepUnusedDataFor: 600,
     }),
-    // Update grade
-    updateGrade: builder.mutation<any, { gradeId: number; gradeData: any }>({
-      query: ({ gradeId, gradeData }) => ({
-        url: `/users/teacher/grade/${gradeId}/`,
+    // Update student grade
+    updateStudentGrade: builder.mutation<
+      any,
+      {
+        submissionId: number;
+        gradeData: {
+          marks_obtained: string;
+          feedback?: string;
+          status?: string;
+        };
+      }
+    >({
+      query: ({ submissionId, gradeData }) => ({
+        url: `/users/teacher/submission/${submissionId}/grade/`,
         method: 'PUT',
         body: gradeData,
       }),
-      invalidatesTags: ['Grades', 'Grade'],
+      invalidatesTags: (_result, _error, { submissionId }) => [
+        { type: 'SubmissionDetail', id: submissionId },
+        'SubmissionDetail',
+        'TeacherGrades',
+      ],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            setShowToast({
+              show: true,
+              type: 'success',
+              toastMessage: 'Grade updated successfully!',
+            }),
+          );
+        } catch (error) {
+          // Error toast is handled by baseQueryWithReauth
+        }
+      },
     }),
-    // Delete grade
-    deleteGrade: builder.mutation<any, number>({
-      query: (gradeId) => ({
-        url: `/users/teacher/grade/${gradeId}/`,
-        method: 'DELETE',
+    // Update question marks for a submission
+    updateQuestionMarks: builder.mutation<
+      any,
+      {
+        submissionId: number;
+        questions: Array<{ question_id: number; marks: string }>;
+      }
+    >({
+      query: ({ submissionId, questions }) => ({
+        url: `/users/teacher/submission/${submissionId}/questions/marks/`,
+        method: 'PUT',
+        body: { questions },
       }),
-      invalidatesTags: ['Grades'],
+      invalidatesTags: (_result, _error, { submissionId }) => [
+        { type: 'SubmissionDetail', id: submissionId },
+        'SubmissionDetail',
+        'TeacherGrades',
+      ],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            setShowToast({
+              show: true,
+              type: 'success',
+              toastMessage: 'Question marks updated successfully!',
+            }),
+          );
+        } catch (error) {
+          // Error toast is handled by baseQueryWithReauth
+        }
+      },
     }),
   }),
 });
 
 export const {
-  useGetGradesBySubjectQuery,
-  useGetGradesBySubjectAndClassroomQuery,
-  useGetGradeByIdQuery,
-  useCreateGradeMutation,
-  useUpdateGradeMutation,
-  useDeleteGradeMutation,
-  useLazyGetGradesBySubjectQuery,
+  useFetchTeacherGradesQuery,
+  useFetchGradesBySubjectQuery,
+  useFetchGradesByIdQuery,
+  useFetchSubmissionDetailQuery,
+  useUpdateStudentGradeMutation,
+  useUpdateQuestionMarksMutation,
+  useLazyFetchTeacherGradesQuery,
+  useLazyFetchGradesBySubjectQuery,
+  useLazyFetchGradesByIdQuery,
+  useLazyFetchSubmissionDetailQuery,
 } = gradesApi;
-
-
-
-
-
-
-

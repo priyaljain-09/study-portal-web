@@ -11,11 +11,17 @@ import AnnouncementDetail from './student/AnnouncementDetail';
 import AssignmentDetail from './student/AssignmentDetail';
 import AssignmentQuestions from './student/AssignmentQuestions';
 import AssignmentSubmit from './student/AssignmentSubmit';
+import PersonDetail from './student/PersonDetail';
+import GradeDetail from './student/GradeDetail';
+import AssignmentGrades from './teacher/AssignmentGrades';
+import StudentSubmissionDetail from './teacher/StudentSubmissionDetail';
 import AddModule from './teacher/AddModule';
 import AddChapter from './teacher/AddChapter';
 import AddDiscussion from './components/discussions/AddDiscussion';
 import AddAnnouncement from './components/announcements/AddAnnouncement';
 import AddSyllabus from './components/syllabus/AddSyllabus';
+import AddAssignment from './components/assignments/AddAssignment';
+import Toast from './components/ui/Toast';
 import './App.css';
 
 // Component to initialize auth state from localStorage
@@ -82,6 +88,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthInitializer>
+        <Toast />
         <Routes>
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
@@ -93,6 +100,9 @@ function App() {
           <Route path="/classroom/:classroomId/subject/:subjectId/assignment/:assignmentId" element={<PrivateRoute><AssignmentDetail /></PrivateRoute>} />
           <Route path="/classroom/:classroomId/subject/:subjectId/assignment/:assignmentId/questions" element={<PrivateRoute><AssignmentQuestions /></PrivateRoute>} />
           <Route path="/classroom/:classroomId/subject/:subjectId/assignment/:assignmentId/submit" element={<PrivateRoute><AssignmentSubmit /></PrivateRoute>} />
+          <Route path="/classroom/:classroomId/subject/:subjectId/assignment/:assignmentId/grades" element={<PrivateRoute><AssignmentGrades /></PrivateRoute>} />
+          <Route path="/classroom/:classroomId/subject/:subjectId/assignment/:assignmentId/submission/:submissionId" element={<PrivateRoute><StudentSubmissionDetail /></PrivateRoute>} />
+          <Route path="/classroom/:classroomId/subject/:subjectId/grade/:gradeId" element={<PrivateRoute><GradeDetail /></PrivateRoute>} />
           <Route path="/classroom/:classroomId/subject/:subjectId/add-module" element={<PrivateRoute><AddModule /></PrivateRoute>} />
           <Route path="/classroom/:classroomId/subject/:subjectId/add-chapter" element={<PrivateRoute><AddChapter /></PrivateRoute>} />
           <Route path="/classroom/:classroomId/subject/:subjectId/add-discussion" element={<PrivateRoute><AddDiscussion /></PrivateRoute>} />
@@ -101,6 +111,9 @@ function App() {
           <Route path="/classroom/:classroomId/subject/:subjectId/edit-announcement/:announcementId" element={<PrivateRoute><AddAnnouncement /></PrivateRoute>} />
           <Route path="/classroom/:classroomId/subject/:subjectId/add-syllabus" element={<PrivateRoute><AddSyllabus /></PrivateRoute>} />
           <Route path="/classroom/:classroomId/subject/:subjectId/edit-syllabus/:syllabusItemId" element={<PrivateRoute><AddSyllabus /></PrivateRoute>} />
+          <Route path="/classroom/:classroomId/subject/:subjectId/add-assignment" element={<PrivateRoute><AddAssignment /></PrivateRoute>} />
+          <Route path="/classroom/:classroomId/subject/:subjectId/edit-assignment/:assignmentId" element={<PrivateRoute><AddAssignment /></PrivateRoute>} />
+          <Route path="/classroom/:classroomId/subject/:subjectId/person/:personId" element={<PrivateRoute><PersonDetail /></PrivateRoute>} />
           {/* Student routes with subjectId only */}
           <Route path="/subject/:subjectId" element={<PrivateRoute><SubjectDetail /></PrivateRoute>} />
           <Route path="/subject/:subjectId/chapter/:chapterId" element={<PrivateRoute><ChapterDetail /></PrivateRoute>} />
@@ -109,6 +122,9 @@ function App() {
           <Route path="/subject/:subjectId/assignment/:assignmentId" element={<PrivateRoute><AssignmentDetail /></PrivateRoute>} />
           <Route path="/subject/:subjectId/assignment/:assignmentId/questions" element={<PrivateRoute><AssignmentQuestions /></PrivateRoute>} />
           <Route path="/subject/:subjectId/assignment/:assignmentId/submit" element={<PrivateRoute><AssignmentSubmit /></PrivateRoute>} />
+          <Route path="/subject/:subjectId/assignment/:assignmentId/grades" element={<PrivateRoute><AssignmentGrades /></PrivateRoute>} />
+          <Route path="/subject/:subjectId/assignment/:assignmentId/submission/:submissionId" element={<PrivateRoute><StudentSubmissionDetail /></PrivateRoute>} />
+          <Route path="/subject/:subjectId/grade/:gradeId" element={<PrivateRoute><GradeDetail /></PrivateRoute>} />
           <Route path="/subject/:subjectId/add-module" element={<PrivateRoute><AddModule /></PrivateRoute>} />
           <Route path="/subject/:subjectId/add-chapter" element={<PrivateRoute><AddChapter /></PrivateRoute>} />
           <Route path="/subject/:subjectId/add-discussion" element={<PrivateRoute><AddDiscussion /></PrivateRoute>} />
@@ -117,6 +133,9 @@ function App() {
           <Route path="/subject/:subjectId/edit-announcement/:announcementId" element={<PrivateRoute><AddAnnouncement /></PrivateRoute>} />
           <Route path="/subject/:subjectId/add-syllabus" element={<PrivateRoute><AddSyllabus /></PrivateRoute>} />
           <Route path="/subject/:subjectId/edit-syllabus/:syllabusItemId" element={<PrivateRoute><AddSyllabus /></PrivateRoute>} />
+          <Route path="/subject/:subjectId/add-assignment" element={<PrivateRoute><AddAssignment /></PrivateRoute>} />
+          <Route path="/subject/:subjectId/edit-assignment/:assignmentId" element={<PrivateRoute><AddAssignment /></PrivateRoute>} />
+          <Route path="/subject/:subjectId/person/:personId" element={<PrivateRoute><PersonDetail /></PrivateRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthInitializer>

@@ -3,30 +3,62 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
-import { useGetAssignmentByIdQuery } from '../redux/api/assignmentApi';
+import { useGetStudentAssignmentQuestionsQuery, useGetTeacherAssignmentByIdQuery } from '../redux/api/assignmentApi';
 import HTMLContentViewer from '../components/HTMLContentViewer';
-import { ClipboardList, Upload, FileText } from 'lucide-react';
+import { ClipboardList, Upload, FileText, CheckCircle } from 'lucide-react';
 
 const AssignmentDetail = () => {
-  const { subjectId, assignmentId } = useParams<{ subjectId: string; assignmentId: string }>();
+  const { subjectId, assignmentId, classroomId: classroomIdParam } = useParams<{ 
+    subjectId: string; 
+    assignmentId: string; 
+    classroomId?: string;
+  }>();
   const navigate = useNavigate();
   const location = useLocation();
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
   const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
 
   // Get data from location state
-  const { assignment, courseColor, course } = location.state || {};
+  const { assignment, courseColor, course, classroomId: classroomIdFromState, subjectName } = location.state || {};
+  
+  // Get classroomId from URL params or location state
+  const classroomId = classroomIdParam ? Number(classroomIdParam) : classroomIdFromState;
 
-  const { data: assignmentDetail, isLoading } = useGetAssignmentByIdQuery(Number(assignmentId), {
-    skip: !assignmentId,
-  });
+  // Helper function to get the correct route path based on user role
+  const getRoutePath = (path: string) => {
+    if (userRole === 'teacher' && classroomId) {
+      return `/classroom/${classroomId}${path}`;
+    }
+    return path;
+  };
+
+  const handleBack = () => {
+    navigate(getRoutePath(`/subject/${subjectId}?tab=assignment`), {
+      state: { subjectName, classroomId }
+    });
+  };
+
+  // Use role-specific endpoints
+  const { data: teacherAssignmentData, isLoading: isLoadingTeacher } = useGetTeacherAssignmentByIdQuery(
+    Number(assignmentId),
+    { skip: !assignmentId || userRole !== 'teacher' }
+  );
+
+  const { data: studentAssignmentData, isLoading: isLoadingStudent } = useGetStudentAssignmentQuestionsQuery(
+    Number(assignmentId),
+    { skip: !assignmentId || userRole === 'teacher' }
+  );
+
+  const isLoading = userRole === 'teacher' ? isLoadingTeacher : isLoadingStudent;
 
   const userInitial = userProfile?.user?.first_name?.charAt(0) ||
     userProfile?.user?.username?.charAt(0) ||
     'S';
 
-  // Use assignmentDetail if available, otherwise fall back to assignment from state
-  const assignmentData = assignmentDetail || assignment;
+  // Use role-specific data or fall back to assignment from state
+  const assignmentData = userRole === 'teacher' 
+    ? (teacherAssignmentData || assignment)
+    : (studentAssignmentData || assignment);
 
   // Memoize HTML content to prevent unnecessary re-renders
   const htmlContent = useMemo(() => {
@@ -61,7 +93,7 @@ const AssignmentDetail = () => {
           <Header
             userInitial={userInitial}
             userName={userProfile?.user?.first_name || userProfile?.user?.username}
-            onBackClick={() => navigate(`/subject/${subjectId}`)}
+            onBackClick={handleBack}
           />
           <div className="flex-1 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
@@ -79,7 +111,7 @@ const AssignmentDetail = () => {
           <Header
             userInitial={userInitial}
             userName={userProfile?.user?.first_name || userProfile?.user?.username}
-            onBackClick={() => navigate(`/subject/${subjectId}`)}
+            onBackClick={handleBack}
           />
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
@@ -94,6 +126,7 @@ const AssignmentDetail = () => {
 
   const isMixedType = assignmentData.assignment_type === 'mixed';
   const hasQuestions = assignmentData?.questions?.length > 0;
+  const isSubmitted = assignmentData?.submitted || false;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -104,7 +137,7 @@ const AssignmentDetail = () => {
         <Header
           userInitial={userInitial}
           userName={userProfile?.user?.first_name || userProfile?.user?.username}
-          onBackClick={() => navigate(`/subject/${subjectId}`)}
+          onBackClick={handleBack}
         />
 
         {/* Main Content - Scrollable */}
@@ -155,11 +188,23 @@ const AssignmentDetail = () => {
                 </p>
               </div>
             )}
+
+            {/* Submission Status for Students */}
+            {userRole === 'student' && isSubmitted && (
+              <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <p className="text-sm font-semibold text-green-800">
+                    You have already submitted this assignment.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Fixed Bottom Action Bar */}
-        {userRole === 'student' && (
+        {userRole === 'student' && !isSubmitted && (
           <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-8 py-4 z-10 shadow-lg">
             <div className="max-w-4xl mx-auto">
               {isMixedType ? (

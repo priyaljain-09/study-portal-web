@@ -10,8 +10,7 @@ import Button from '../components/ui/Button';
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const role = "teacher";
-  const { isLoading, successLogin, userRole } = useSelector((state: RootState) => state.applicationData);
+  const { isLoading, successLogin } = useSelector((state: RootState) => state.applicationData);
   
   const [schoolCode, setSchoolCode] = useState('');
   const [email, setEmail] = useState('');
@@ -20,10 +19,10 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (successLogin && userRole) {
+    if (successLogin) {
       navigate('/dashboard', { replace: true });
     }
-  }, [successLogin, userRole, navigate]);
+  }, [successLogin, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +45,6 @@ const Login = () => {
         school_code: schoolCode || "1e827e31-d0ec-4561-9ec1-abd9b0523e6f",
         email: email.trim(),
         password: password.trim(),
-        role: role, // Required field - must be "student" or "teacher"
       }));
     } catch (error: any) {
       // Error is handled by the slice's setShowToast action

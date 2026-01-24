@@ -22,6 +22,7 @@ interface AssignmentListProps {
   userRole: string;
   onAddAssignment?: () => void;
   onAssignmentClick?: (assignment: any) => void;
+  onEditAssignment?: (assignment: any) => void;
 }
 
 const AssignmentList: React.FC<AssignmentListProps> = ({
@@ -30,6 +31,7 @@ const AssignmentList: React.FC<AssignmentListProps> = ({
   userRole,
   onAddAssignment,
   onAssignmentClick,
+  onEditAssignment,
 }) => {
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null);
   const [deletingAssignmentId, setDeletingAssignmentId] = useState<number | null>(null);
@@ -63,15 +65,12 @@ const AssignmentList: React.FC<AssignmentListProps> = ({
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return 'Invalid date';
 
-    const options: Intl.DateTimeFormatOptions = {
-      day: '2-digit',
+    // Simple date format matching mobile design
+    return date.toLocaleDateString('en-US', {
       month: 'short',
+      day: 'numeric',
       year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    };
-    return new Intl.DateTimeFormat('en-GB', options).format(date).replace(',', ' at');
+    });
   };
 
   const getStatusIconAndColor = (item: any) => {
@@ -117,14 +116,29 @@ const AssignmentList: React.FC<AssignmentListProps> = ({
   const handleClick = (assignment: any) => {
     if (selectedAssignmentId === assignment.id) {
       setSelectedAssignmentId(null);
-    } else if (onAssignmentClick) {
-      onAssignmentClick(assignment);
+      return;
+    }
+    
+    if (isTeacher && onEditAssignment) {
+      // For teachers, clicking on assignment opens edit page
+      onEditAssignment(assignment);
+    } else if (!isTeacher) {
+      // For students
+      if (assignment.submitted) {
+        // If already submitted, show alert
+        alert('Already Submitted\nYou have already submitted this assignment.');
+      } else if (onAssignmentClick) {
+        // If not submitted, navigate to detail page
+        onAssignmentClick(assignment);
+      }
     }
   };
 
   const handleEdit = (assignment: any) => {
     setSelectedAssignmentId(null);
-    if (onAssignmentClick) {
+    if (onEditAssignment) {
+      onEditAssignment(assignment);
+    } else if (onAssignmentClick) {
       onAssignmentClick(assignment);
     }
   };
@@ -198,7 +212,7 @@ const AssignmentList: React.FC<AssignmentListProps> = ({
       )}
 
       {/* Assignments List */}
-      <div className="space-y-2">
+      <div className="space-y-0">
         {assignments.map((assignment: any) => {
           const isSelected = selectedAssignmentId === assignment.id;
           const isDeleting = deletingAssignmentId === assignment.id;
@@ -207,100 +221,96 @@ const AssignmentList: React.FC<AssignmentListProps> = ({
           return (
             <div
               key={assignment.id}
-              className={`bg-white rounded-lg border border-gray-200 hover:shadow-md transition ${
-                isSelected ? 'ring-2 ring-purple-500 bg-purple-50' : ''
-              } ${isDeleting ? 'opacity-60' : ''}`}
+              className={`bg-white border-b border-gray-200 hover:bg-gray-50 transition relative ${
+                isSelected ? 'bg-purple-50' : ''
+              } ${isDeleting ? 'opacity-60 pointer-events-none' : 'cursor-pointer'}`}
+              onClick={() => !isDeleting && handleClick(assignment)}
               onContextMenu={(e) => {
                 e.preventDefault();
-                handleLongPress(assignment.id);
+                if (isTeacher) {
+                  handleLongPress(assignment.id);
+                }
               }}
             >
-              <div
-                onClick={() => handleClick(assignment)}
-                className="p-4 cursor-pointer"
-              >
-                {isDeleting ? (
-                  <div className="flex items-center justify-center py-8 gap-3">
+              {isDeleting && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+                  <div className="flex items-center gap-3">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
                     <span className="text-sm text-gray-600 font-medium">Deleting...</span>
                   </div>
-                ) : (
-                  <div className="flex items-start gap-4">
-                    {/* Icon */}
-                    <div className="flex-shrink-0 mt-1">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        {getAssignmentIcon(assignment)}
-                      </div>
-                    </div>
+                </div>
+              )}
+              
+              <div className="flex items-start gap-3 px-4 py-3.5">
+                {/* Icon */}
+                <div className="flex-shrink-0 mt-0.5">
+                  {getAssignmentIcon(assignment)}
+                </div>
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="text-base font-semibold text-gray-900 mb-2">
-                            {assignment.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mb-2">
-                            Due: {formatDate(assignment.due_date || assignment.dueDate)}
-                          </p>
-                          
-                          {/* Status for Students */}
-                          {!isTeacher && statusInfo && (
-                            <div className="flex items-center gap-2 mt-2">
-                              {statusInfo.icon}
-                              <span className={`text-sm font-medium ${statusInfo.color}`}>
-                                {statusInfo.text}
-                              </span>
-                            </div>
-                          )}
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900 mb-1">
+                    {assignment.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {formatDate(assignment.due_date || assignment.dueDate)}
+                  </p>
 
-                          {/* Marks Display */}
-                          <div className="flex items-center gap-4 mt-2">
-                            {isTeacher ? (
-                              <span className="text-sm font-semibold text-gray-700">
-                                {assignment.total_marks || assignment.totalMarks || 0} Marks
-                              </span>
-                            ) : (
-                              <span className={`text-sm font-semibold ${
-                                assignment.submitted ? 'text-purple-600' : 'text-gray-600'
-                              }`}>
-                                {assignment.submitted 
-                                  ? `✔️ ${assignment.total_marks || assignment.totalMarks || 0} Marks`
-                                  : `- / ${assignment.total_marks || assignment.totalMarks || 0}`}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action Buttons (for teachers when selected) */}
-                        {isTeacher && isSelected && (
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEdit(assignment);
-                              }}
-                              className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-                              title="Edit Assignment"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(assignment.id);
-                              }}
-                              className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                              title="Delete Assignment"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                  {/* Status and Marks Row */}
+                  <div className="flex items-center justify-between">
+                    {isTeacher ? (
+                      <span className="text-sm font-semibold text-gray-700">
+                        {assignment.total_marks || assignment.totalMarks || 0} Marks
+                      </span>
+                    ) : (
+                      <>
+                        {/* Status for Students */}
+                        {statusInfo && (
+                          <div className="flex items-center gap-1.5">
+                            {statusInfo.icon}
+                            <span className={`text-sm font-medium ${statusInfo.color}`}>
+                              {statusInfo.text}
+                            </span>
                           </div>
                         )}
+                        {/* Marks Display for Students */}
+                        <span className={`text-sm font-semibold ${
+                          assignment.submitted ? 'text-purple-600' : 'text-gray-600'
+                        }`}>
+                          {assignment.submitted 
+                            ? `✔️ ${assignment.total_marks || assignment.totalMarks || 0} Marks`
+                            : `- / ${assignment.total_marks || assignment.totalMarks || 0}`}
+                        </span>
+                      </>
+                    )}
+
+                    {/* Action Buttons (for teachers when selected) */}
+                    {isTeacher && isSelected && (
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(assignment);
+                          }}
+                          className="p-1.5 hover:bg-blue-100 rounded transition"
+                          title="Edit Assignment"
+                        >
+                          <Pencil className="w-4 h-4 text-blue-600" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(assignment.id);
+                          }}
+                          className="p-1.5 hover:bg-red-100 rounded transition"
+                          title="Delete Assignment"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
                       </div>
-                    </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           );

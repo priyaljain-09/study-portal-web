@@ -13,6 +13,7 @@ import AnnouncementList from '../components/announcements/AnnouncementList';
 import SyllabusList from '../components/syllabus/SyllabusList';
 import PeopleList from '../components/people/PeopleList';
 import AssignmentList from '../components/assignments/AssignmentList';
+import GradesList from '../components/grades/GradesList';
 import { BookOpen, MessageSquare, Bell, FileText, Award, Users, ClipboardList } from 'lucide-react';
 
 const SubjectDetail = () => {
@@ -245,10 +246,32 @@ const SubjectDetail = () => {
 
       case 'grades':
         return (
-          <div className="text-center py-12">
-            <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">Grades tab - API integration pending</p>
-          </div>
+          <GradesList
+            subjectId={Number(subjectId)}
+            classroomId={classroomId}
+            userRole={userRole}
+            courseColor={subjectColor}
+            onAssignmentClick={(assignment) => {
+              navigate(getRoutePath(`/subject/${subjectId}/assignment/${assignment.id}/grades`), {
+                state: { 
+                  assignment, 
+                  subjectName, 
+                  classroomId,
+                  courseColor: subjectColor,
+                  course: { id: Number(subjectId), title: subjectName, color: subjectColor }
+                }
+              });
+            }}
+            onGradeClick={(grade) => {
+              navigate(`/subject/${subjectId}/grade/${grade.id}`, {
+                state: { 
+                  grade, 
+                  courseColor: subjectColor,
+                  subjectName
+                }
+              });
+            }}
+          />
         );
 
       case 'people':
@@ -258,8 +281,14 @@ const SubjectDetail = () => {
             classroomId={classroomId}
             userRole={userRole}
             onPersonClick={(person) => {
-              // Navigate to person detail page
-              alert(`Person Detail: ${person.name} - to be implemented`);
+              navigate(getRoutePath(`/subject/${subjectId}/person/${person.id}`), {
+                state: {
+                  person,
+                  courseColor: subjectColor,
+                  subjectName,
+                  classroomId,
+                },
+              });
             }}
           />
         );
@@ -271,11 +300,20 @@ const SubjectDetail = () => {
             classroomId={classroomId}
             userRole={userRole}
             onAddAssignment={() => {
-              // Navigate to add assignment page or show modal
-              alert('Add Assignment functionality - to be implemented');
+              navigate(getRoutePath(`/subject/${subjectId}/add-assignment?tab=assignment`), {
+                state: { subjectName, classroomId }
+              });
+            }}
+            onEditAssignment={(assignment) => {
+              navigate(getRoutePath(`/subject/${subjectId}/edit-assignment/${assignment.id}?tab=assignment`), {
+                state: { 
+                  assignment, 
+                  subjectName, 
+                  classroomId
+                }
+              });
             }}
             onAssignmentClick={(assignment) => {
-              // Navigate to assignment detail page
               navigate(getRoutePath(`/subject/${subjectId}/assignment/${assignment.id}`), {
                 state: { 
                   assignment, 
