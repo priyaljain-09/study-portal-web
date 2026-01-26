@@ -19,7 +19,8 @@ const AssignmentDetail = () => {
   const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
 
   // Get data from location state
-  const { assignment, courseColor, course, classroomId: classroomIdFromState, subjectName } = location.state || {};
+  const { assignment, courseColor, course, classroomId: classroomIdFromState } = location.state || {};
+  const subjectName = course?.title || assignment?.subject_name || assignment?.subject || '';
   
   // Get classroomId from URL params or location state
   const classroomId = classroomIdParam ? Number(classroomIdParam) : classroomIdFromState;

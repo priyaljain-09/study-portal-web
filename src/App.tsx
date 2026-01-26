@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from './redux/hooks';
 import { useEffect } from 'react';
 import { loginsuccess, setUserRole, fetchUserProfile } from './redux/slices/applicationSlice';
+import { useGetUnreadCountQuery } from './redux/api/notificationsApi';
+import { setUnreadCount } from './redux/slices/notificationsSlice';
 import Login from './authentication/Login';
 import Dashboard from './student/Dashboard';
 import SubjectDetail from './student/SubjectDetail';
@@ -15,6 +17,10 @@ import PersonDetail from './student/PersonDetail';
 import GradeDetail from './student/GradeDetail';
 import AssignmentGrades from './teacher/AssignmentGrades';
 import StudentSubmissionDetail from './teacher/StudentSubmissionDetail';
+import Calendar from './calendar/Calendar';
+import Chat from './chat/Chat';
+import Profile from './Profile';
+import Notifications from './notifications/Notifications';
 import AddModule from './teacher/AddModule';
 import AddChapter from './teacher/AddChapter';
 import AddDiscussion from './components/discussions/AddDiscussion';
@@ -29,6 +35,9 @@ const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) => state.applicationData.successLogin);
   const userProfile = useAppSelector((state) => state.applicationData.userProfile);
+  const { data: unreadCount } = useGetUnreadCountQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   useEffect(() => {
     // Check if user is already logged in (has token in localStorage)
@@ -52,6 +61,12 @@ const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
       dispatch(loginsuccess(false));
     }
   }, [dispatch, isAuthenticated, userProfile]);
+
+  useEffect(() => {
+    if (unreadCount !== undefined && isAuthenticated) {
+      dispatch(setUnreadCount(unreadCount));
+    }
+  }, [unreadCount, isAuthenticated, dispatch]);
 
   return <>{children}</>;
 };
@@ -136,6 +151,10 @@ function App() {
           <Route path="/subject/:subjectId/add-assignment" element={<PrivateRoute><AddAssignment /></PrivateRoute>} />
           <Route path="/subject/:subjectId/edit-assignment/:assignmentId" element={<PrivateRoute><AddAssignment /></PrivateRoute>} />
           <Route path="/subject/:subjectId/person/:personId" element={<PrivateRoute><PersonDetail /></PrivateRoute>} />
+          <Route path="/calendar" element={<PrivateRoute><Calendar /></PrivateRoute>} />
+          <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthInitializer>

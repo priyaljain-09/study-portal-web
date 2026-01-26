@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../redux/hooks';
 import { logout } from '../../redux/slices/applicationSlice';
-import { Home, Calendar, User, Settings, LogOut, BookOpen } from 'lucide-react';
+import { Home, Calendar, User, Settings, LogOut, MessageCircle } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -13,9 +13,10 @@ interface NavItem {
 interface SidebarProps {
   activePath?: string;
   className?: string;
+  onNavigate?: () => void;
 }
 
-const Sidebar = ({ activePath = '/dashboard', className = '' }: SidebarProps) => {
+const Sidebar = ({ activePath = '/dashboard', className = '', onNavigate }: SidebarProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -26,8 +27,8 @@ const Sidebar = ({ activePath = '/dashboard', className = '' }: SidebarProps) =>
 
   const navItems: NavItem[] = [
     { label: 'Dashboard', icon: Home, path: '/dashboard' },
-    { label: 'My Courses', icon: BookOpen, path: '/courses' },
     { label: 'Calendar', icon: Calendar, path: '/calendar' },
+    { label: 'Chat', icon: MessageCircle, path: '/chat' },
     { label: 'Profile', icon: User, path: '/profile' },
     { label: 'Settings', icon: Settings, path: '/settings' },
   ];
@@ -37,19 +38,23 @@ const Sidebar = ({ activePath = '/dashboard', className = '' }: SidebarProps) =>
       item.onClick();
     } else if (item.path) {
       navigate(item.path);
+      if (onNavigate) {
+        onNavigate();
+      }
     }
   };
 
   return (
-    <div className={`w-64 bg-gradient-to-b from-purple-600 to-blue-600 text-white flex flex-col h-screen ${className}`}>
+    <div
+      className={`w-64 text-white flex flex-col h-screen bg-primary ${className}`}
+    >
       {/* Logo/Brand */}
       <div className="p-6">
-        <h1 className="text-2xl font-bold">EduHub</h1>
+        <h1 className="text-2xl font-bold">Strov</h1>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-4">
-        <p className="text-xs font-semibold text-purple-200 uppercase tracking-wider mb-3 px-3">Navigation</p>
         <ul className="space-y-2">
           {navItems.map((item) => {
             const isActive = activePath === item.path;
