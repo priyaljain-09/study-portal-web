@@ -279,7 +279,6 @@ const SubjectDetail = () => {
           <PeopleList
             subjectId={Number(subjectId)}
             classroomId={classroomId}
-            userRole={userRole}
             onPersonClick={(person) => {
               navigate(getRoutePath(`/subject/${subjectId}/person/${person.id}`), {
                 state: {

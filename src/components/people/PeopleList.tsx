@@ -23,7 +23,6 @@ interface Person {
 interface PeopleListProps {
   subjectId: number;
   classroomId?: number;
-  userRole: string;
   onPersonClick?: (person: Person) => void;
 }
 

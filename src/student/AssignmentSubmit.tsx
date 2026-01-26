@@ -15,7 +15,7 @@ const AssignmentSubmit = () => {
   const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || 'student';
 
   // Get data from location state
-  const { course, classroomId: classroomIdFromState, subjectName } = location.state || {};
+  const { course, classroomId: classroomIdFromState } = location.state || {};
   
   // Get classroomId from URL params or location state
   const classroomId = classroomIdParam ? Number(classroomIdParam) : classroomIdFromState;
@@ -35,7 +35,7 @@ const AssignmentSubmit = () => {
   const handleBackToAssignments = () => {
     navigate(getRoutePath(`/subject/${subjectId}?tab=assignment`), {
       state: {
-        subjectName: subjectName || course?.title,
+        subjectName: course?.title,
         classroomId,
       }
     });
