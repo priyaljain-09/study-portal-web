@@ -5,7 +5,7 @@ import { useGetNotificationsQuery, useMarkNotificationAsReadMutation } from '../
 import { markAsRead } from '../redux/slices/notificationsSlice';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
-import { Bell, ArrowLeft } from 'lucide-react';
+import { Bell } from 'lucide-react';
 
 const Notifications = () => {
   const navigate = useNavigate();

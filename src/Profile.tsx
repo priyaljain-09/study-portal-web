@@ -14,8 +14,7 @@ const Profile = () => {
     'U';
 
   const userName = userProfile?.user?.first_name || userProfile?.user?.username || 'User';
-  const userEmail = userProfile?.user?.email || '';
-  const userRole = userProfile?.user?.role || '';
+  const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole') || '';
   const teacherProfile = userProfile?.teacher_profile;
   const studentProfile = userProfile?.student_profile;
 
