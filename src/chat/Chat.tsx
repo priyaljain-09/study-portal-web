@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import { useAppSelector } from '../redux/hooks';
-import { MessageCircle, Search, Send, Plus, Image as ImageIcon, Video as VideoIcon, File as FileIcon, X } from 'lucide-react';
+import { MessageCircle, Search, Send, Plus, Image as ImageIcon, Video as VideoIcon, File as FileIcon, X, ChevronDown, Pencil, Trash2, Check, CheckCheck } from 'lucide-react';
 import { useAppDispatch } from '../redux/hooks';
 import {
   fetchConversations,
@@ -12,6 +12,10 @@ import {
   sendMediaMessage,
   setCurrentConversationId,
   markConversationAsRead,
+  editMessage,
+  deleteMessage,
+  updateMessage,
+  removeMessage,
 } from '../redux/slices/chat';
 import { websocketService } from '../services/websocketService';
 import type { Conversation } from '../types/chat';
@@ -34,6 +38,10 @@ const Chat = () => {
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hoveredMessageId, setHoveredMessageId] = useState<number | null>(null);
+  const [messageMenuOpen, setMessageMenuOpen] = useState<number | null>(null);
+  const [editingMessage, setEditingMessage] = useState<{ id: number; body: string } | null>(null);
+  const [editText, setEditText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -41,6 +49,7 @@ const Chat = () => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const hasFetchedConversations = useRef(false);
   const isLoadingOlder = useRef(false);
+  const hasLoadedInitialMessages = useRef<{ [key: number]: boolean }>({});
 
   const activeConversationId = currentConversationId;
   const activeConversation =
@@ -68,8 +77,19 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    if (activeConversationId && !messages[activeConversationId]) {
-      dispatch(fetchMessages(activeConversationId));
+    if (activeConversationId) {
+      if (!messages[activeConversationId]) {
+        // First time loading messages for this conversation
+        hasLoadedInitialMessages.current[activeConversationId] = false;
+        dispatch(fetchMessages(activeConversationId)).then(() => {
+          hasLoadedInitialMessages.current[activeConversationId] = true;
+        }).catch(() => {
+          hasLoadedInitialMessages.current[activeConversationId] = true;
+        });
+      } else if (messages[activeConversationId]?.length > 0) {
+        // Messages already loaded
+        hasLoadedInitialMessages.current[activeConversationId] = true;
+      }
     }
   }, [activeConversationId, messages, dispatch]);
 
@@ -103,6 +123,59 @@ const Chat = () => {
 
   const hasMoreMessages = activeConversationId ? cursors[activeConversationId] !== null : false;
 
+  const handleEditMessage = async () => {
+    if (!editingMessage || !editText.trim()) {
+      setEditingMessage(null);
+      setEditText('');
+      return;
+    }
+
+    try {
+      const wsSent = websocketService.editMessage(editingMessage.id, editText.trim());
+      if (wsSent && activeConversationId) {
+        dispatch(updateMessage({ conversationId: activeConversationId, messageId: editingMessage.id, body: editText.trim() }));
+        const state = store.getState();
+        const conversation = state.chat.conversations.find((c) => c.conversation_id === activeConversationId);
+        if (conversation?.last_message?.id === editingMessage.id) {
+          const updatedMessage = { ...conversation.last_message, body: editText.trim() };
+          dispatch(updateConversationLastMessage({ conversationId: activeConversationId, message: updatedMessage }));
+        }
+      } else {
+        await dispatch(editMessage(editingMessage.id, editText.trim()));
+      }
+      setEditingMessage(null);
+      setEditText('');
+    } catch (error) {
+      // Error is handled by the thunk
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!window.confirm('Are you sure you want to delete this message?')) {
+      return;
+    }
+
+    try {
+      const wsSent = websocketService.deleteMessage(messageId);
+      if (wsSent && activeConversationId) {
+        dispatch(removeMessage({ conversationId: activeConversationId, messageId }));
+        const state = store.getState();
+        const conversation = state.chat.conversations.find((c) => c.conversation_id === activeConversationId);
+        if (conversation?.last_message?.id === messageId) {
+          const messages = state.chat.messages[activeConversationId] || [];
+          const newLastMessage = messages.length > 1 ? messages[messages.length - 2] : null;
+          if (newLastMessage) {
+            dispatch(updateConversationLastMessage({ conversationId: activeConversationId, message: newLastMessage }));
+          }
+        }
+      } else {
+        await dispatch(deleteMessage(messageId));
+      }
+    } catch (error) {
+      // Error is handled by the thunk
+    }
+  };
+
   const handleSendMessage = () => {
     if (!inputValue.trim() || !activeConversationId) return;
     const clientMessageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -132,6 +205,22 @@ const Chat = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showMediaDropdown]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (messageMenuOpen !== null) {
+        setMessageMenuOpen(null);
+      }
+    };
+
+    if (messageMenuOpen !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [messageMenuOpen]);
 
   const handleFileSelect = async (file: File, type: 'image' | 'video' | 'file') => {
     if (!activeConversationId || uploadingMedia) return;
@@ -188,6 +277,16 @@ const Chat = () => {
       return `https://${domain}${url.startsWith('/') ? url : `/${url}`}`;
     }
     return `https://euniiq.com${url.startsWith('/') ? url : `/${url}`}`;
+  };
+
+  const formatMessageTime = (dateString: string): string => {
+    const date = new Date(dateString);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, '0');
+    return `${displayHours}:${displayMinutes} ${ampm}`;
   };
 
   const loadOlderMessages = useCallback(async () => {
@@ -309,10 +408,10 @@ const Chat = () => {
                           }
                         }}
                         className={`w-full flex items-center gap-3 px-4 py-3 border-b border-gray-100 text-left transition ${
-                          isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                          isActive ? 'bg-primary/10' : 'hover:bg-gray-50'
                         }`}
                       >
-                        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
                           {conversation.other_user.username.charAt(0)}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -350,7 +449,7 @@ const Chat = () => {
                               )}
                             </p>
                             {conversation.unread_count > 0 && (
-                              <span className="bg-blue-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                              <span className="bg-primary text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
                                 {conversation.unread_count}
                               </span>
                             )}
@@ -370,7 +469,7 @@ const Chat = () => {
               <>
                 <div className="border-b border-gray-200 bg-white p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+                    <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
                       {activeConversation.other_user.username.charAt(0)}
                     </div>
                     <div>
@@ -387,61 +486,158 @@ const Chat = () => {
                   className="flex-1 overflow-y-auto p-6 space-y-4 max-h-[calc(100vh-220px)]"
                   onScroll={handleScroll}
                 >
+                  {/* Loading indicator for older messages (at top) */}
                   {isLoadingMore && (
                     <div className="flex items-center justify-center py-4">
-                      <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                       <span className="ml-2 text-sm text-gray-500">Loading older messages...</span>
                     </div>
                   )}
-                  {conversationMessages.length > 0 ? (
+                  {/* Loading indicator for initial messages (center) */}
+                  {isLoading && activeConversationId && !hasLoadedInitialMessages.current[activeConversationId] && conversationMessages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-sm text-gray-500">Loading messages...</p>
+                      </div>
+                    </div>
+                  ) : conversationMessages.length > 0 ? (
                     conversationMessages.map((message) => {
                       const isMine = message.sender_id === userProfile?.user?.id;
+                      const isHovered = hoveredMessageId === message.id;
+                      const isMenuOpen = messageMenuOpen === message.id;
+                      const showMenuButton = isMine && message.id && (isHovered || isMenuOpen);
+                      
                       return (
                         <div
                           key={message.id || message.client_message_id}
-                          className={`flex ${isMine ? 'justify-end' : 'justify-start'} mb-4`}
+                          className={`flex ${isMine ? 'justify-end' : 'justify-start'} mb-4 group`}
+                          onMouseEnter={() => message.id && setHoveredMessageId(message.id)}
+                          onMouseLeave={() => setHoveredMessageId(null)}
                         >
-                          <div
-                            className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
-                              isMine
-                                ? 'bg-blue-600 text-white rounded-tr-md'
-                                : 'bg-white text-gray-900 border border-gray-200 rounded-tl-md'
-                            }`}
-                          >
-                            {message.type === 'image' && message.file_url ? (
-                              <div className="space-y-2">
-                                <img
-                                  src={getFileUrl(message.file_url)}
-                                  alt={message.body || 'Image'}
-                                  className="max-w-full rounded-lg cursor-pointer"
-                                  onClick={() => message.file_url && setFullScreenImage(getFileUrl(message.file_url))}
-                                />
-                                {message.body && <p>{message.body}</p>}
-                              </div>
-                            ) : message.type === 'video' && message.file_url ? (
-                              <div className="space-y-2">
-                                <video
-                                  src={getFileUrl(message.file_url)}
-                                  controls
-                                  className="max-w-full rounded-lg"
-                                />
-                                {message.body && <p>{message.body}</p>}
-                              </div>
-                            ) : message.type === 'file' && message.file_url ? (
-                              <div className="space-y-2">
-                                <a
-                                  href={getFileUrl(message.file_url)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-2 underline"
+                          <div className={`relative flex items-center gap-2 ${isMine ? 'flex-row-reverse' : ''}`}>
+                            {showMenuButton && (
+                              <div className="relative">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMessageMenuOpen(isMenuOpen ? null : message.id!);
+                                  }}
+                                  className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition"
                                 >
-                                  <FileIcon className="w-4 h-4" />
-                                  <span>{message.body || 'Download file'}</span>
-                                </a>
+                                  <ChevronDown className="w-4 h-4" />
+                                </button>
+                                {isMenuOpen && (
+                                  <div className={`absolute ${isMine ? 'right-0' : 'left-0'} top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[120px] z-50`}>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const canEdit = !message.type || message.type === 'text';
+                                        if (message.id && canEdit && message.body) {
+                                          setEditingMessage({ id: message.id, body: message.body });
+                                          setEditText(message.body);
+                                          setMessageMenuOpen(null);
+                                        }
+                                      }}
+                                      disabled={message.type && message.type !== 'text'}
+                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                      <Pencil className="w-4 h-4" />
+                                      <span>Edit</span>
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (message.id) {
+                                          handleDeleteMessage(message.id);
+                                          setMessageMenuOpen(null);
+                                        }
+                                      }}
+                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                      <span>Delete</span>
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                            ) : (
-                              <p>{message.body || ''}</p>
                             )}
+                            <div className="relative max-w-[70%]">
+                              <div
+                                className={`px-3 py-2 text-sm relative ${
+                                  isMine
+                                    ? 'bg-[#DCF8C6] text-gray-900 rounded-lg'
+                                    : 'bg-white text-gray-900 border border-gray-200 rounded-lg'
+                                }`}
+                              >
+                                {message.type === 'image' && message.file_url ? (
+                                  <div className="space-y-2">
+                                    <img
+                                      src={getFileUrl(message.file_url)}
+                                      alt={message.body || 'Image'}
+                                      className="max-w-full rounded-lg cursor-pointer"
+                                      onClick={() => message.file_url && setFullScreenImage(getFileUrl(message.file_url))}
+                                    />
+                                    {message.body && <p className="mb-1">{message.body}</p>}
+                                  </div>
+                                ) : message.type === 'video' && message.file_url ? (
+                                  <div className="space-y-2">
+                                    <video
+                                      src={getFileUrl(message.file_url)}
+                                      controls
+                                      className="max-w-full rounded-lg"
+                                    />
+                                    {message.body && <p className="mb-1">{message.body}</p>}
+                                  </div>
+                                ) : message.type === 'file' && message.file_url ? (
+                                  <div className="space-y-2">
+                                    <a
+                                      href={getFileUrl(message.file_url)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-2 underline"
+                                    >
+                                      <FileIcon className="w-4 h-4" />
+                                      <span>{message.body || 'Download file'}</span>
+                                    </a>
+                                  </div>
+                                ) : (
+                                  <p className="mb-1">{message.body || ''}</p>
+                                )}
+                                <div className="flex items-center justify-end gap-1 mt-1">
+                                  <span className="text-[10px] text-gray-500">
+                                    {formatMessageTime(message.created_at)}
+                                  </span>
+                                  {isMine && (
+                                    <div className="flex items-center">
+                                      <CheckCheck className="w-3 h-3 text-blue-500" />
+                                    </div>
+                                  )}
+                                </div>
+                                {/* Tail for user's messages - pointing right from bottom-right */}
+                                {isMine && (
+                                  <div
+                                    className="absolute -right-2 bottom-0 w-0 h-0"
+                                    style={{
+                                      borderLeft: '8px solid #DCF8C6',
+                                      borderTop: '6px solid transparent',
+                                      borderBottom: '6px solid transparent',
+                                    }}
+                                  ></div>
+                                )}
+                                {/* Tail for received messages - pointing left from bottom-left */}
+                                {!isMine && (
+                                  <div
+                                    className="absolute -left-2 bottom-0 w-0 h-0"
+                                    style={{
+                                      borderRight: '8px solid white',
+                                      borderTop: '6px solid transparent',
+                                      borderBottom: '6px solid transparent',
+                                    }}
+                                  ></div>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );
@@ -541,7 +737,7 @@ const Chat = () => {
                 />
                 <button
                   onClick={handleSendMessage}
-                  className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center disabled:opacity-40 hover:bg-blue-700 transition"
+                  className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-40 hover:bg-primary/90 transition"
                   disabled={!inputValue.trim() || !activeConversation || uploadingMedia}
                   title="Send"
                 >
@@ -555,6 +751,72 @@ const Chat = () => {
                 <div className="text-center">
                   <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500 text-lg">Select a recipient from the left to start chatting</p>
+                </div>
+              </div>
+            )}
+
+            {/* Edit Message Modal */}
+            {editingMessage && (
+              <div
+                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                onClick={() => {
+                  setEditingMessage(null);
+                  setEditText('');
+                }}
+              >
+                <div
+                  className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                    <button
+                      onClick={() => {
+                        setEditingMessage(null);
+                        setEditText('');
+                      }}
+                      className="p-1 hover:bg-gray-100 rounded-full transition"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                    <h3 className="text-lg font-semibold text-gray-900">Edit message</h3>
+                    <div className="w-6"></div>
+                  </div>
+                  
+                  {/* Message Preview */}
+                  <div className="p-4 bg-gray-50 border-b border-gray-200">
+                    <div className="flex justify-end">
+                      <div className="max-w-[70%] bg-primary text-white rounded-2xl rounded-tr-md px-4 py-2 text-sm">
+                        <p>{editingMessage.body}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Edit Input */}
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 border-b-2 border-primary pb-2">
+                      <input
+                        type="text"
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        className="flex-1 outline-none text-gray-900"
+                        placeholder="Type your message"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleEditMessage();
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={handleEditMessage}
+                        disabled={!editText.trim()}
+                        className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-40 hover:bg-primary/90 transition"
+                      >
+                        <Check className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

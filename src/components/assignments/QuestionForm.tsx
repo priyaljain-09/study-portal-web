@@ -70,7 +70,7 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
               onClick={() => onTypeChange('mcq')}
               className={`flex-1 px-4 py-2 rounded-lg border transition ${
                 question.question_type === 'mcq'
-                  ? 'bg-purple-600 border-purple-600 text-white'
+                  ? 'bg-primary border-primary text-white'
                   : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -81,7 +81,7 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
               onClick={() => onTypeChange('text')}
               className={`flex-1 px-4 py-2 rounded-lg border transition ${
                 question.question_type === 'text'
-                  ? 'bg-purple-600 border-purple-600 text-white'
+                  ? 'bg-primary border-primary text-white'
                   : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -132,7 +132,7 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
               <button
                 type="button"
                 onClick={onAddOption}
-                className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm"
+                className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Option</span>
@@ -182,7 +182,7 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
           className={`w-full px-4 py-2 rounded-lg font-semibold text-white transition ${
             isSaving
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-purple-600 hover:bg-purple-700'
+              : 'bg-primary hover:bg-primary/90'
           }`}
         >
           {isSaving ? (

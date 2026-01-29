@@ -180,7 +180,7 @@ const AddAnnouncement = () => {
                   className={`w-full px-6 py-3 rounded-lg font-semibold text-white transition ${
                     !title.trim() || !content.trim() || isSaving
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-purple-600 hover:bg-purple-700'
+                      : 'bg-primary hover:bg-primary/90'
                   }`}
                 >
                   {isSaving ? 'Saving...' : isEditMode ? 'Update Announcement' : 'Create Announcement'}

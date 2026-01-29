@@ -84,7 +84,7 @@ const AssignmentSubmit = () => {
               <div className="px-5 pb-10">
                 <button
                   onClick={handleBackToAssignments}
-                  className="w-full py-3.5 px-5 rounded-full font-semibold text-base bg-blue-100 text-gray-900 hover:bg-blue-200 transition min-h-[50px]"
+                  className="w-full py-3.5 px-5 rounded-full font-semibold text-base bg-primary/10 text-primary hover:bg-primary/20 transition min-h-[50px]"
                 >
                   Back to Assignments
                 </button>

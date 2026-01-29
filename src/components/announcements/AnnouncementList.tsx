@@ -112,7 +112,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
         {userRole === 'teacher' && onAddAnnouncement ? (
           <button
             onClick={onAddAnnouncement}
-            className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
+            className="flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition shadow-sm mx-auto"
           >
             <Plus className="w-5 h-5" />
             <span>Create Announcement</span>
@@ -121,7 +121,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
           onAddAnnouncement && (
             <button
               onClick={onAddAnnouncement}
-              className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
+              className="flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition shadow-sm mx-auto"
             >
               <Plus className="w-5 h-5" />
               <span>Create Announcement</span>
@@ -139,7 +139,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
         <div className="flex justify-end mb-4">
           <button
             onClick={onAddAnnouncement}
-            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm"
+            className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition shadow-sm"
           >
             <Plus className="w-5 h-5" />
             <span>Add Announcement</span>
@@ -202,7 +202,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
                                 e.stopPropagation();
                                 handleEdit(announcement);
                               }}
-                              className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                              className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
                               title="Edit Announcement"
                             >
                               <Pencil className="w-4 h-4" />

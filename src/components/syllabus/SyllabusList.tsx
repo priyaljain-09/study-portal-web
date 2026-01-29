@@ -107,7 +107,7 @@ const SyllabusList: React.FC<SyllabusListProps> = ({
         {userRole === 'teacher' && onAddSyllabus ? (
           <button
             onClick={onAddSyllabus}
-            className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
+            className="flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition shadow-sm mx-auto"
           >
             <Plus className="w-5 h-5" />
             <span>Add Syllabus Item</span>
@@ -116,7 +116,7 @@ const SyllabusList: React.FC<SyllabusListProps> = ({
           onAddSyllabus && (
             <button
               onClick={onAddSyllabus}
-              className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
+              className="flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition shadow-sm mx-auto"
             >
               <Plus className="w-5 h-5" />
               <span>Add Syllabus Item</span>
@@ -134,7 +134,7 @@ const SyllabusList: React.FC<SyllabusListProps> = ({
         <div className="flex justify-end mb-4">
           <button
             onClick={onAddSyllabus}
-            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm"
+            className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition shadow-sm"
           >
             <Plus className="w-5 h-5" />
             <span>Add Syllabus Item</span>

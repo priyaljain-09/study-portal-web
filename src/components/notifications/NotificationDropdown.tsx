@@ -97,12 +97,12 @@ const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownProps) =>
                 key={notification.id}
                 onClick={() => handleNotificationClick(notification.id)}
                 className={`p-4 hover:bg-gray-50 cursor-pointer transition ${
-                  !notification.is_read ? 'bg-blue-50' : ''
+                  !notification.is_read ? 'bg-primary/10' : ''
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${
-                    !notification.is_read ? 'bg-blue-600' : 'bg-transparent'
+                    !notification.is_read ? 'bg-primary' : 'bg-transparent'
                   }`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900">{notification.title}</p>

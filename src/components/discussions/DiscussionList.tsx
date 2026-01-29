@@ -158,7 +158,7 @@ const DiscussionList: React.FC<DiscussionListProps> = ({
         {onAddDiscussion ? (
           <button
             onClick={onAddDiscussion}
-            className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
+            className="flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition shadow-sm mx-auto"
           >
             <Plus className="w-5 h-5" />
             <span>Start a Discussion</span>
@@ -166,7 +166,7 @@ const DiscussionList: React.FC<DiscussionListProps> = ({
         ) : (
           <button
             onClick={() => alert('Add Discussion functionality not available')}
-            className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm mx-auto"
+            className="flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition shadow-sm mx-auto"
           >
             <Plus className="w-5 h-5" />
             <span>Start a Discussion</span>
@@ -183,7 +183,7 @@ const DiscussionList: React.FC<DiscussionListProps> = ({
         <div className="flex justify-end mb-4">
           <button
             onClick={onAddDiscussion}
-            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-sm"
+            className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition shadow-sm"
           >
             <Plus className="w-5 h-5" />
             <span>Add Discussion</span>
