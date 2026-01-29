@@ -10,6 +10,8 @@ import { peopleApi } from "./api/peopleApi";
 import { assignmentApi } from "./api/assignmentApi";
 import { calendarApi } from "./api/calendarApi";
 import { notificationsApi } from "./api/notificationsApi";
+import { todoApi } from "./api/todoApi";
+import { vocabularyApi } from "./api/vocabularyApi";
 import chatReducer from "./slices/chat";
 import notificationsReducer from "./slices/notificationsSlice";
 
@@ -28,6 +30,8 @@ export const store = configureStore({
     [assignmentApi.reducerPath]: assignmentApi.reducer,
     [calendarApi.reducerPath]: calendarApi.reducer,
     [notificationsApi.reducerPath]: notificationsApi.reducer,
+    [todoApi.reducerPath]: todoApi.reducer,
+    [vocabularyApi.reducerPath]: vocabularyApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -39,7 +43,9 @@ export const store = configureStore({
       peopleApi.middleware,
       assignmentApi.middleware,
       calendarApi.middleware,
-      notificationsApi.middleware
+      notificationsApi.middleware,
+      todoApi.middleware,
+      vocabularyApi.middleware
     ),
 });
 

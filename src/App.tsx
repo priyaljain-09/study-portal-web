@@ -21,6 +21,8 @@ import Calendar from './calendar/Calendar';
 import Chat from './chat/Chat';
 import Profile from './Profile';
 import Notifications from './notifications/Notifications';
+import Todo from './todo/Todo';
+import Vocabulary from './vocabulary/Vocabulary';
 import AddModule from './teacher/AddModule';
 import AddChapter from './teacher/AddChapter';
 import AddDiscussion from './components/discussions/AddDiscussion';
@@ -153,6 +155,8 @@ function App() {
           <Route path="/subject/:subjectId/person/:personId" element={<PrivateRoute><PersonDetail /></PrivateRoute>} />
           <Route path="/calendar" element={<PrivateRoute><Calendar /></PrivateRoute>} />
           <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
+          <Route path="/todo" element={<PrivateRoute><Todo /></PrivateRoute>} />
+          <Route path="/vocabulary" element={<PrivateRoute><Vocabulary /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

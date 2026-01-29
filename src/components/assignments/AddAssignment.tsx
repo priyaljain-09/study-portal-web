@@ -512,7 +512,7 @@ const AddAssignment = () => {
                   className={`w-full px-6 py-3 rounded-lg font-semibold text-white transition ${
                     !title.trim() || !dueDate || totalMarks <= 0 || isSaving
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-purple-600 hover:bg-purple-700'
+                      : 'bg-primary hover:bg-primary/90'
                   }`}
                 >
                   {isSaving 
@@ -531,7 +531,7 @@ const AddAssignment = () => {
                   <h3 className="text-xl font-bold text-gray-900">Questions</h3>
                   <button
                     onClick={handleAddQuestion}
-                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
                   >
                     <Plus className="w-5 h-5" />
                     <span>Add Question</span>

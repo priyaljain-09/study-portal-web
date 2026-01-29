@@ -5,8 +5,9 @@ import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 import { fetchDashboardSubject } from '../redux/slices/dashboard';
 import type { StudentDashboardData, Subject } from '../types/dashboard';
-import { Grid3x3, List, ChevronLeft, ChevronRight, Bell } from 'lucide-react';
+import { Grid3x3, List, ChevronLeft, ChevronRight, Bell, BookOpen } from 'lucide-react';
 import { SUBJECT_COLORS, SUBJECT_ICONS } from '../constants/subjects';
+import { useGetVocabularyTodayQuery } from '../redux/api/vocabularyApi';
 
 const StudentDashboard = () => {
   const location = useLocation();
@@ -23,6 +24,7 @@ const StudentDashboard = () => {
 
   const subjects: Subject[] = dashboardData?.subjects || [];
   const announcements = dashboardData?.announcements || [];
+  const { data: vocabularyWord } = useGetVocabularyTodayQuery();
 
   const getSubjectColor = (index: number): { borderColor: string; bgColor: string } => {
     const color = SUBJECT_COLORS[index % SUBJECT_COLORS.length];
@@ -251,7 +253,7 @@ const StudentDashboard = () => {
                           day === null
                             ? 'text-transparent'
                             : day === currentDate && isCurrentMonth
-                              ? 'bg-purple-600 text-white font-semibold rounded-full'
+                              ? 'bg-primary text-white font-semibold rounded-full'
                               : 'text-gray-700 hover:bg-gray-100 cursor-pointer rounded-full'
                         }`}
                       >
@@ -260,6 +262,23 @@ const StudentDashboard = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Vocabulary Word of the Day */}
+                {vocabularyWord && (
+                  <div
+                    onClick={() => navigate('/vocabulary')}
+                    className="mb-6 bg-gradient-to-br from-primary to-primary/80 rounded-xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <BookOpen className="w-5 h-5" />
+                      <h2 className="text-lg font-semibold">Word of the Day</h2>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-1">{vocabularyWord.word}</h3>
+                    <p className="text-sm opacity-90 mb-2">{vocabularyWord.part_of_speech}</p>
+                    <p className="text-sm leading-relaxed line-clamp-2">{vocabularyWord.definition}</p>
+                    <p className="text-xs opacity-75 mt-3">Click to view more →</p>
+                  </div>
+                )}
 
                 {/* Announcements */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

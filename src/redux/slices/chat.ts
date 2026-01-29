@@ -363,6 +363,55 @@ export function sendMessage(conversationId: number, body: string, clientMessageI
   };
 }
 
+export function editMessage(messageId: number, body: string) {
+  return async (dispatch: AppDispatch) => {
+    try {
+      const response = await api.patch<Message>(`/chat/messages/${messageId}/`, { body });
+      const state = store.getState();
+      const conversationId = state.chat.currentConversationId;
+      if (conversationId) {
+        dispatch(updateMessage({ conversationId, messageId, body }));
+        const conversation = state.chat.conversations.find((c) => c.conversation_id === conversationId);
+        if (conversation?.last_message?.id === messageId) {
+          dispatch(updateConversationLastMessage({ conversationId, message: response.data }));
+        }
+      }
+      return response.data;
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.detail || error?.message || 'Failed to edit message';
+      dispatch(setShowToast({ show: true, type: 'error', toastMessage: errorMessage }));
+      throw error;
+    }
+  };
+}
+
+export function deleteMessage(messageId: number) {
+  return async (dispatch: AppDispatch) => {
+    try {
+      await api.delete(`/chat/messages/${messageId}/`);
+      const state = store.getState();
+      const conversationId = state.chat.currentConversationId;
+      if (conversationId) {
+        dispatch(removeMessage({ conversationId, messageId }));
+        const conversation = state.chat.conversations.find((c) => c.conversation_id === conversationId);
+        if (conversation?.last_message?.id === messageId) {
+          const messages = state.chat.messages[conversationId] || [];
+          const newLastMessage = messages.length > 1 ? messages[messages.length - 2] : null;
+          if (newLastMessage) {
+            dispatch(updateConversationLastMessage({ conversationId, message: newLastMessage }));
+          }
+        }
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.detail || error?.message || 'Failed to delete message';
+      dispatch(setShowToast({ show: true, type: 'error', toastMessage: errorMessage }));
+      throw error;
+    }
+  };
+}
+
 export function sendMediaMessage(
   conversationId: number,
   file: File,

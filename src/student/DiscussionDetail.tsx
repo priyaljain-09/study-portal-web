@@ -410,7 +410,7 @@ const DiscussionDetail = () => {
                                   <button
                                     onClick={handleSaveEditReply}
                                     disabled={updatingReplyId === reply.id || !editReplyText.trim()}
-                                    className="px-3 py-1.5 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition disabled:opacity-50"
+                                    className="px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition disabled:opacity-50"
                                   >
                                     {updatingReplyId === reply.id ? (
                                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -497,7 +497,7 @@ const DiscussionDetail = () => {
                     onClick={handleSendReply}
                     disabled={isSubmittingReply || !replyText.trim()}
                     className={`p-2 rounded-full transition ${
-                      replyText.trim() ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-300 cursor-not-allowed'
+                      replyText.trim() ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300 cursor-not-allowed'
                     }`}
                   >
                     {isSubmittingReply ? (
