@@ -293,7 +293,7 @@ const StudentSubmissionDetail = () => {
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition"
+                    className="px-4 py-2 bg-[#043276] text-white text-sm font-semibold rounded-lg hover:bg-[#043276]/90 transition"
                   >
                     Edit Marks
                   </button>

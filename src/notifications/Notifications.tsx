@@ -70,12 +70,12 @@ const Notifications = () => {
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification.id)}
                     className={`p-6 hover:bg-gray-50 cursor-pointer transition ${
-                      !notification.is_read ? 'bg-primary/10' : ''
+                      !notification.is_read ? 'bg-[#043276]/10' : ''
                     }`}
                   >
                     <div className="flex items-start gap-4">
                       <div className={`flex-shrink-0 w-3 h-3 rounded-full mt-2 ${
-                        !notification.is_read ? 'bg-primary' : 'bg-transparent'
+                        !notification.is_read ? 'bg-[#043276]' : 'bg-transparent'
                       }`} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-2">

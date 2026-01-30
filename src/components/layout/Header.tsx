@@ -71,7 +71,7 @@ const Header = ({ userInitial = 'S', onMenuClick, onBackClick, className = '' }:
             onClose={() => setShowNotifications(false)}
           />
         </div>
-        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
+        <div className="w-10 h-10 bg-[#043276] rounded-full flex items-center justify-center text-white font-semibold">
           {userInitial.toUpperCase()}
         </div>
       </div>

@@ -71,7 +71,7 @@ const Vocabulary = () => {
               </div>
               <button
                 onClick={() => setShowSubmitForm(!showSubmitForm)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
+                className="flex items-center gap-2 px-4 py-2 bg-[#043276] text-white rounded-lg hover:bg-[#043276]/90 transition"
               >
                 <Plus className="w-5 h-5" />
                 <span>Submit Word</span>
@@ -100,7 +100,7 @@ const Vocabulary = () => {
                       required
                       value={formData.word}
                       onChange={(e) => handleInputChange('word', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#043276]"
                       placeholder="Enter word"
                     />
                   </div>
@@ -112,7 +112,7 @@ const Vocabulary = () => {
                       required
                       value={formData.definition}
                       onChange={(e) => handleInputChange('definition', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#043276]"
                       placeholder="Enter definition"
                       rows={3}
                     />
@@ -126,7 +126,7 @@ const Vocabulary = () => {
                       required
                       value={formData.part_of_speech}
                       onChange={(e) => handleInputChange('part_of_speech', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#043276]"
                       placeholder="e.g., noun, verb, adjective"
                     />
                   </div>
@@ -138,7 +138,7 @@ const Vocabulary = () => {
                       required
                       value={formData.example}
                       onChange={(e) => handleInputChange('example', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#043276]"
                       placeholder="Enter example sentence"
                       rows={2}
                     />
@@ -147,7 +147,7 @@ const Vocabulary = () => {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition disabled:opacity-50"
+                      className="px-6 py-2 bg-[#043276] text-white rounded-lg hover:bg-[#043276]/90 transition disabled:opacity-50"
                     >
                       {isSubmitting ? 'Submitting...' : 'Submit'}
                     </button>
@@ -170,11 +170,11 @@ const Vocabulary = () => {
             {isLoadingToday ? (
               <div className="mb-6 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                 <div className="flex items-center justify-center py-8">
-                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-4 border-[#043276] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               </div>
             ) : todayWord ? (
-              <div className="mb-6 bg-gradient-to-br from-primary to-primary/80 rounded-lg p-6 text-white shadow-lg">
+              <div className="mb-6 bg-gradient-to-br from-[#043276] to-[#043276]/80 rounded-lg p-6 text-white shadow-lg">
                 <div className="flex items-center gap-3 mb-4">
                   <BookOpen className="w-6 h-6" />
                   <h2 className="text-xl font-bold">Word of the Day</h2>
@@ -210,7 +210,7 @@ const Vocabulary = () => {
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Words</h2>
               {isLoadingHistory ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-4 border-[#043276] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : historyWords.length > 0 ? (
                 <div className="space-y-4">

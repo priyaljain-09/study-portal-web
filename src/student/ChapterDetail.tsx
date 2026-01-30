@@ -164,7 +164,7 @@ const ChapterDetail = () => {
               disabled={!canGoToNext}
               className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition ${
                 canGoToNext
-                  ? 'bg-primary text-white hover:bg-primary/90'
+                  ? 'bg-[#043276] text-white hover:bg-[#043276]/90'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
             >

@@ -184,7 +184,7 @@ const AddSyllabus = () => {
                   className={`w-full px-6 py-3 rounded-lg font-semibold text-white transition ${
                     !chapterName.trim() || isLoading
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-primary hover:bg-primary/90'
+                      : 'bg-[#043276] hover:bg-[#043276]/90'
                   }`}
                 >
                   {isLoading ? 'Saving...' : isEditMode ? 'Update Syllabus Item' : 'Save Syllabus Item'}
