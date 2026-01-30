@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import { useAppSelector } from '../redux/hooks';
-import { MessageCircle, Search, Send, Plus, Image as ImageIcon, Video as VideoIcon, File as FileIcon, X, ChevronDown, Pencil, Trash2, Check, CheckCheck, Download } from 'lucide-react';
+import { MessageCircle, Search, Send, Plus, Image as ImageIcon, Video as VideoIcon, File as FileIcon, X, ChevronDown, Pencil, Trash2, Check } from 'lucide-react';
 import { useAppDispatch } from '../redux/hooks';
 import { store } from '../redux/store';
 import {
