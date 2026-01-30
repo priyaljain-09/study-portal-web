@@ -109,7 +109,7 @@ const Todo = () => {
             {/* Content */}
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-4 border-[#043276] border-t-transparent rounded-full animate-spin"></div>
               </div>
             ) : todos.length > 0 ? (
               <div className="space-y-3">
@@ -118,7 +118,7 @@ const Todo = () => {
                     key={todo.id}
                     className={`
                       bg-white rounded-lg p-4 shadow-sm border-l-4 transition
-                      ${todo.completed ? 'border-green-500' : 'border-primary'}
+                      ${todo.completed ? 'border-green-500' : 'border-[#043276]'}
                     `}
                   >
                     <div className="flex items-start gap-3 mb-3">

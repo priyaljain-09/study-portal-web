@@ -214,7 +214,7 @@ const AssignmentDetail = () => {
                   disabled={!hasQuestions}
                   className={`w-full py-4 px-6 rounded-lg font-semibold text-base transition ${
                     hasQuestions
-                      ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                      ? 'bg-[#043276]/10 text-[#043276] hover:bg-[#043276]/20'
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   }`}
                 >
@@ -226,7 +226,7 @@ const AssignmentDetail = () => {
               ) : (
                 <button
                   onClick={handleUploadFile}
-                  className="w-full py-4 px-6 rounded-lg font-semibold text-base bg-primary text-white hover:bg-primary/90 transition shadow-md"
+                  className="w-full py-4 px-6 rounded-lg font-semibold text-base bg-[#043276] text-white hover:bg-[#043276]/90 transition shadow-md"
                 >
                   <div className="flex items-center justify-center space-x-2">
                     <Upload className="w-5 h-5" />

@@ -253,7 +253,7 @@ const StudentDashboard = () => {
                           day === null
                             ? 'text-transparent'
                             : day === currentDate && isCurrentMonth
-                              ? 'bg-primary text-white font-semibold rounded-full'
+                              ? 'bg-[#043276] text-white font-semibold rounded-full'
                               : 'text-gray-700 hover:bg-gray-100 cursor-pointer rounded-full'
                         }`}
                       >
@@ -267,7 +267,7 @@ const StudentDashboard = () => {
                 {vocabularyWord && (
                   <div
                     onClick={() => navigate('/vocabulary')}
-                    className="mb-6 bg-gradient-to-br from-primary to-primary/80 rounded-xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition"
+                    className="mb-6 bg-gradient-to-br from-[#043276] to-[#043276]/80 rounded-xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition"
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <BookOpen className="w-5 h-5" />

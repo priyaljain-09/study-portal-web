@@ -48,7 +48,7 @@ const Sidebar = ({ activePath = '/dashboard', className = '', onNavigate }: Side
 
   return (
     <div
-      className={`w-64 text-white flex flex-col h-screen bg-primary ${className}`}
+      className={`w-64 text-white flex flex-col h-screen bg-[#043276] ${className}`}
     >
       {/* Logo/Brand */}
       <div className="p-6">

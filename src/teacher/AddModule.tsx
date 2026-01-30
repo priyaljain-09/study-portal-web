@@ -321,7 +321,7 @@ const AddModule = () => {
             className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-semibold transition ${
               !moduleName.trim() || isCreatingModule
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-primary text-white hover:bg-primary/90'
+                : 'bg-[#043276] text-white hover:bg-[#043276]/90'
             }`}
           >
             <Plus className="w-5 h-5" />
@@ -349,7 +349,7 @@ const AddModule = () => {
             className={`w-full px-6 py-3 rounded-lg font-semibold text-white transition ${
               !moduleName.trim() || isCreatingModule
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-primary hover:bg-primary/90'
+                : 'bg-[#043276] hover:bg-[#043276]/90'
             }`}
           >
             {isCreatingModule ? 'Saving...' : 'Save Module'}
@@ -404,7 +404,7 @@ const AddModule = () => {
             className={`flex items-center space-x-2 px-4 py-3 rounded-lg font-semibold transition ${
               !currentSectionTitle.trim()
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-primary text-white hover:bg-primary/90'
+                : 'bg-[#043276] text-white hover:bg-[#043276]/90'
             }`}
           >
             <span>Add Next Section</span>
@@ -426,7 +426,7 @@ const AddModule = () => {
           className={`w-full px-6 py-3 rounded-lg font-semibold text-white transition ${
             !currentSectionTitle.trim() || isSaving
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-primary hover:bg-primary/90'
+              : 'bg-[#043276] hover:bg-[#043276]/90'
           }`}
         >
           {isSaving ? 'Saving...' : isEditMode ? 'Save Chapter' : 'Save Module'}
