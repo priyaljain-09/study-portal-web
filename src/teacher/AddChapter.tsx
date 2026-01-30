@@ -133,7 +133,7 @@ const AddChapter = () => {
                   className={`w-full px-6 py-3 rounded-lg font-semibold text-white transition ${
                     !chapterTitle.trim() || isSaving
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-purple-600 hover:bg-purple-700'
+                      : 'bg-[#043276] hover:bg-[#043276]/90'
                   }`}
                 >
                   {isSaving ? 'Saving...' : isEditMode ? 'Update Chapter' : 'Create Chapter'}

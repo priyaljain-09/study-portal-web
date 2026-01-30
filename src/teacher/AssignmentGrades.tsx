@@ -289,7 +289,7 @@ const AssignmentGrades = () => {
                         {grade.is_submitted && (
                           <button
                             onClick={(e) => handleEditPress(grade, e)}
-                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition-colors"
+                            className="px-3 py-1.5 bg-[#043276] hover:bg-[#043276]/90 text-white text-xs font-semibold rounded-md transition-colors"
                           >
                             Edit
                           </button>

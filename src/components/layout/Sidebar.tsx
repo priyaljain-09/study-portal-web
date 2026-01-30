@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { logout } from '../../redux/slices/applicationSlice';
-import { Home, Calendar, User, Settings, LogOut, MessageCircle } from 'lucide-react';
+import { Home, Calendar, User, Settings, LogOut, MessageCircle, CheckSquare } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -19,6 +19,7 @@ interface SidebarProps {
 const Sidebar = ({ activePath = '/dashboard', className = '', onNavigate }: SidebarProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const userRole = useAppSelector((state) => state.applicationData.userRole) || localStorage.getItem('userRole');
 
   const handleLogout = () => {
     dispatch(logout());
@@ -29,6 +30,7 @@ const Sidebar = ({ activePath = '/dashboard', className = '', onNavigate }: Side
     { label: 'Dashboard', icon: Home, path: '/dashboard' },
     { label: 'Calendar', icon: Calendar, path: '/calendar' },
     { label: 'Chat', icon: MessageCircle, path: '/chat' },
+    ...(userRole === 'student' ? [{ label: 'To-Do', icon: CheckSquare, path: '/todo' }] : []),
     { label: 'Profile', icon: User, path: '/profile' },
     { label: 'Settings', icon: Settings, path: '/settings' },
   ];
@@ -46,7 +48,7 @@ const Sidebar = ({ activePath = '/dashboard', className = '', onNavigate }: Side
 
   return (
     <div
-      className={`w-64 text-white flex flex-col h-screen bg-primary ${className}`}
+      className={`w-64 text-white flex flex-col h-screen bg-[#043276] ${className}`}
     >
       {/* Logo/Brand */}
       <div className="p-6">

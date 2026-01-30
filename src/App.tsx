@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { loginsuccess, setUserRole, fetchUserProfile } from './redux/slices/applicationSlice';
 import { useGetUnreadCountQuery } from './redux/api/notificationsApi';
 import { setUnreadCount } from './redux/slices/notificationsSlice';
-import Login from './authentication/Login';
 import Dashboard from './student/Dashboard';
 import SubjectDetail from './student/SubjectDetail';
 import ChapterDetail from './student/ChapterDetail';
@@ -21,6 +20,8 @@ import Calendar from './calendar/Calendar';
 import Chat from './chat/Chat';
 import Profile from './Profile';
 import Notifications from './notifications/Notifications';
+import Todo from './todo/Todo';
+import Vocabulary from './vocabulary/Vocabulary';
 import AddModule from './teacher/AddModule';
 import AddChapter from './teacher/AddChapter';
 import AddDiscussion from './components/discussions/AddDiscussion';
@@ -29,6 +30,7 @@ import AddSyllabus from './components/syllabus/AddSyllabus';
 import AddAssignment from './components/assignments/AddAssignment';
 import Toast from './components/ui/Toast';
 import './App.css';
+import Index from './authentication';
 
 // Component to initialize auth state from localStorage
 const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
@@ -105,7 +107,7 @@ function App() {
       <AuthInitializer>
         <Toast />
         <Routes>
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/login" element={<PublicRoute><Index /></PublicRoute>} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           {/* Teacher routes with classroomId */}
           <Route path="/classroom/:classroomId/subject/:subjectId" element={<PrivateRoute><SubjectDetail /></PrivateRoute>} />
@@ -153,6 +155,8 @@ function App() {
           <Route path="/subject/:subjectId/person/:personId" element={<PrivateRoute><PersonDetail /></PrivateRoute>} />
           <Route path="/calendar" element={<PrivateRoute><Calendar /></PrivateRoute>} />
           <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
+          <Route path="/todo" element={<PrivateRoute><Todo /></PrivateRoute>} />
+          <Route path="/vocabulary" element={<PrivateRoute><Vocabulary /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

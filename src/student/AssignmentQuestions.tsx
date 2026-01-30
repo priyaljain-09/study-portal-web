@@ -247,8 +247,8 @@ const AssignmentQuestions = () => {
                 disabled={isSubmitting}
                 className={`w-full py-3.5 rounded-lg font-semibold text-white transition ${
                   isSubmitting
-                    ? 'bg-purple-400 cursor-not-allowed'
-                    : 'bg-purple-600 hover:bg-purple-700'
+                    ? 'bg-[#043276]/70 cursor-not-allowed'
+                    : 'bg-[#043276] hover:bg-[#043276]/90'
                 }`}
                 style={{ backgroundColor: isSubmitting ? undefined : courseColor || '#8B5CF6' }}
               >
@@ -264,7 +264,7 @@ const AssignmentQuestions = () => {
             ) : (
               <button
                 onClick={handleNext}
-                className="w-full py-3.5 rounded-lg font-semibold bg-blue-100 text-gray-900 hover:bg-blue-200 transition"
+                className="w-full py-3.5 rounded-lg font-semibold bg-[#043276]/10 text-[#043276] hover:bg-[#043276]/20 transition"
               >
                 Next
               </button>

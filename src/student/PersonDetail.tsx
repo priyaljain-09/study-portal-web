@@ -92,7 +92,7 @@ const PersonDetail = () => {
               <p className="text-gray-500 text-lg">Person not found</p>
               <button
                 onClick={handleBack}
-                className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                className="mt-4 px-4 py-2 bg-[#043276] text-white rounded-lg hover:bg-[#043276]/90"
               >
                 Go Back
               </button>

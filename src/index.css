@@ -1,21 +1,294 @@
 @import "tailwindcss";
 
-@theme {
-  --color-primary: #043276;
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 216 93% 24%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 216 93% 24%;
+
+    --radius: 0.75rem;
+
+    /* Login page specific colors */
+    --login-bg: 222 47% 14%;
+    --login-bg-secondary: 230 50% 20%;
+    --login-shape: 200 80% 70%;
+    --login-orb: 222 65% 35%;
+    --login-orb-secondary: 250 60% 45%;
+    --login-orb-tertiary: 180 70% 50%;
+    --login-grid: 200 80% 80%;
+    --login-orbit: 200 80% 70%;
+    --login-dot: 180 80% 60%;
+    --login-dot-secondary: 260 80% 70%;
+    
+    /* Input styling */
+    --input-bg: 210 40% 98%;
+    --input-border: 214 32% 85%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 216 93% 24%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 213 27% 84%;
+    
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
 }
 
-* {
-  box-sizing: border-box;
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
 }
 
-.animate-blob {
-  animation: blob 7s infinite;
-}
+@layer utilities {
+  .bg-login-gradient {
+    background: linear-gradient(135deg, hsl(var(--login-bg)) 0%, hsl(var(--login-bg-secondary)) 100%);
+  }
 
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
+  /* Login color utilities using HSL variables */
+  .bg-login-shape {
+    background-color: hsl(var(--login-shape) / 0.1);
+  }
 
-.animation-delay-4000 {
-  animation-delay: 4s;
+  .bg-login-orb {
+    background-color: hsl(var(--login-orb));
+  }
+
+  .bg-login-orb-secondary {
+    background-color: hsl(var(--login-orb-secondary));
+  }
+
+  .bg-login-orb-tertiary {
+    background-color: hsl(var(--login-orb-tertiary));
+  }
+
+  .border-login-orbit {
+    border-color: hsl(var(--login-orbit) / 0.2);
+  }
+
+  .border-login-shape {
+    border-color: hsl(var(--login-shape) / 0.1);
+  }
+
+  .bg-login-dot {
+    background-color: hsl(var(--login-dot));
+  }
+
+  .bg-login-dot-secondary {
+    background-color: hsl(var(--login-dot-secondary));
+  }
+
+  .text-login-grid {
+    color: hsl(var(--login-grid) / 0.1);
+  }
+
+  .text-login-dot {
+    color: hsl(var(--login-dot));
+  }
+
+  .shadow-login-dot {
+    box-shadow: 0 0 20px hsl(var(--login-dot) / 0.5);
+  }
+
+  .shadow-login-dot-secondary {
+    box-shadow: 0 0 20px hsl(var(--login-dot-secondary) / 0.5);
+  }
+
+  /* Input utilities */
+  .bg-input-bg {
+    background-color: hsl(var(--input-bg));
+  }
+
+  .border-input-border {
+    border-color: hsl(var(--input-border));
+  }
+
+  /* Animated Background Animations */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px);
+    }
+    33% {
+      transform: translateY(-20px) translateX(10px);
+    }
+    66% {
+      transform: translateY(10px) translateX(-10px);
+    }
+  }
+
+  @keyframes float-rotate {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px) rotate(0deg);
+    }
+    33% {
+      transform: translateY(-20px) translateX(10px) rotate(120deg);
+    }
+    66% {
+      transform: translateY(10px) translateX(-10px) rotate(240deg);
+    }
+  }
+
+  @keyframes float-slow {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px);
+    }
+    50% {
+      transform: translateY(-30px) translateX(15px);
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.1);
+    }
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spin-reverse {
+    from {
+      transform: rotate(360deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-float {
+    animation: float 20s ease-in-out infinite;
+  }
+
+  .animate-float-rotate {
+    animation: float-rotate 25s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float-slow 30s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
+  }
+
+  .animate-spin-reverse {
+    animation: spin-reverse 25s linear infinite;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+
+  /* Legacy animations */
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
 }

@@ -4,8 +4,7 @@ import { login } from '../redux/slices/applicationSlice';
 import { GraduationCap, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../redux/store';
-import Input from '../components/ui/Input';
-import Button from '../components/ui/Button';
+import Label from '../components/ui/Label';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -55,96 +54,112 @@ const Login = () => {
   };
 
   return (
-    <div className="h-full w-full flex items-center justify-center">
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center gap-4">
-          <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
-          <p className="text-gray-600 text-sm font-medium">Signing you in...</p>
+    <div className="w-full max-w-md mx-auto animate-fade-in">
+      {/* Header */}
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#043276]/10 mb-6">
+          <GraduationCap className="w-8 h-8 text-[#043276]" />
         </div>
-      ) : (
-        <div className="w-[33%] flex justify-center items-center flex-col gap-8">
-          {/* Brand Name */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcone Back</h1>
-            <p className="text-[#727B8D] font-semibold text-lg">Sign in to your learning journey</p>
-          </div>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Welcome Back</h1>
+        <p className="text-muted-foreground">Sign in to your learning journey</p>
+      </div>
 
-          {/* Login Form */}
-          <div className="w-full flex flex-col gap-2 p-4">
-            <form onSubmit={handleLogin} className="w-full flex-col gap-4 flex">
-              {/* School Code */}
-              <Input
-                id="schoolCode"
-                type="text"
-                label="School Code"
-                icon={GraduationCap}
-                value={schoolCode}
-                onChange={(e) => setSchoolCode(e.target.value)}
-                placeholder="School Code"
-                autoCapitalize="none"
-                autoCorrect="off"
-                containerClassName="flex flex-col gap-2"
-              />
-
-              {/* Email Input */}
-              <Input
-                id="email"
-                type="email"
-                label="Email"
-                icon={Mail}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                autoCapitalize="none"
-                autoCorrect="off"
-                required
-                containerClassName="flex flex-col gap-2"
-              />
-
-              {/* Password Input */}
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                label="Password"
-                icon={Lock}
-                iconPosition="left"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                required
-                 containerClassName="flex flex-col gap-2"
-                rightElement={
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="p-1 hover:bg-gray-100 rounded transition-colors"
-                    tabIndex={-1}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? (
-                      <Eye className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                    ) : (
-                      <EyeOff className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                    )}
-                  </button>
-                }
-              />
-
-              {/* Log in Button */}
-              <Button
-                type="submit"
-                variant="primary"
-                size="md"
-                fullWidth
-                isLoading={isLoading || isSubmitting}
-                className="mt-6"
-              >
-                {isLoading || isSubmitting ? 'Signing in...' : 'Log in'}
-              </Button>
-            </form>
+      {/* Form */}
+      <form onSubmit={handleLogin} className="space-y-5">
+        {/* School Code */}
+        <div className="space-y-2">
+          <Label htmlFor="schoolCode" className="text-sm font-medium text-foreground">
+            School Code
+          </Label>
+          <div className="relative">
+            <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              id="schoolCode"
+              type="text"
+              value={schoolCode}
+              onChange={(e) => setSchoolCode(e.target.value)}
+              placeholder="Enter your school code"
+              className="w-full pl-11 h-12 bg-input-bg border border-input-border rounded-lg focus:outline-none focus:ring-2 focus:border-[#043276] focus:ring-[#043276]/20 transition-all text-foreground placeholder:text-muted-foreground"
+            />
           </div>
         </div>
-      )}
+
+        {/* Email */}
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-sm font-medium text-foreground">
+            Email
+          </Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+              className="w-full pl-11 h-12 bg-input-bg border border-input-border rounded-lg focus:outline-none focus:ring-2 focus:border-[#043276] focus:ring-[#043276]/20 transition-all text-foreground placeholder:text-muted-foreground"
+            />
+          </div>
+        </div>
+
+        {/* Password */}
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-sm font-medium text-foreground">
+            Password
+          </Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+              className="w-full pl-11 pr-11 h-12 bg-input-bg border border-input-border rounded-lg focus:outline-none focus:ring-2 focus:border-[#043276] focus:ring-[#043276]/20 transition-all text-foreground placeholder:text-muted-foreground"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-md transition-colors"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <Eye className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
+              ) : (
+                <EyeOff className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Forgot Password Link */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            className="text-sm text-[#043276] hover:text-[#043276]/80 font-medium transition-colors"
+          >
+            Forgot password?
+          </button>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isSubmitting || isLoading}
+          className="w-full h-12 text-base font-semibold bg-[#043276] hover:bg-[#043276]/90 text-white shadow-lg shadow-[#043276]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[#043276]/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 rounded-lg flex items-center justify-center"
+        >
+          {isSubmitting || isLoading ? (
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 border-2 border-[#043276]-foreground/30 border-t-[#043276]-foreground rounded-full animate-spin" />
+              Signing in...
+            </div>
+          ) : (
+            'Log in'
+          )}
+        </button>
+      </form>
     </div>
   );
 };

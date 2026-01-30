@@ -198,10 +198,10 @@ const Calendar = () => {
                             onClick={() => setSelectedDate(dateKey)}
                             className={`
                               relative aspect-square rounded-md text-[11px] font-medium transition
-                              ${isSelected ? 'bg-blue-600 text-white' : 'text-gray-900'}
+                              ${isSelected ? 'bg-[#043276] text-white' : 'text-gray-900'}
                               ${!isCurrentMonth ? 'text-gray-300' : ''}
                               ${!isSelected ? 'hover:bg-gray-100' : ''}
-                              ${isToday && !isSelected ? 'border border-blue-500' : ''}
+                              ${isToday && !isSelected ? 'border border-[#043276]' : ''}
                             `}
                           >
                             {date.getDate()}
